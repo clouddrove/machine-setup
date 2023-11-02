@@ -1,0 +1,7 @@
+---
+- name: Create directory for git repos
+  file:
+    path: "{{ home_dir }}/src/git"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ group }}"
+    state: directory

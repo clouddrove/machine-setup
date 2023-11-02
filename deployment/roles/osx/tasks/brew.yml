@@ -1,0 +1,32 @@
+---
+- name: "Install homebrew apps"
+  homebrew:
+    name: "{{ item }}"
+    state: present
+    update_homebrew: yes
+  with_items:
+    - ack
+    - docker
+    - docker-machine
+    - git
+    - npm
+    - nvm
+    - python3
+    - r
+    - ssh-copy-id
+    - tree
+
+- name: "Install hombrew cask apps"
+  homebrew_cask:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - spotify
+    - sublime-text
+    - dropbox
+    - iterm2
+    - slack
+    - google-chrome
+    - firefox
+    - gimp
+    - virtualbox
