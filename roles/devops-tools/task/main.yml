@@ -151,3 +151,118 @@
         name: socat
         state: present
 
+- name: Hubstaff
+  block:
+    - name: Download Hubstaff Installation Package
+      get_url:
+        url: https://example.com/hubstaff_installer.deb
+        dest: /tmp/hubstaff_installer.deb
+
+    - name: Install Dependencies (if required).
+      apt:
+        name: libgtk2.0
+        state: present
+
+    - name: Install Hubstaff
+      shell: dpkg -i /tmp/hubstaff_installer.deb
+
+    - name: Configure Hubstaff Settings
+  handlers:
+    - name: Restart Hubstaff (if required)
+
+
+- name: Slack
+  block:
+    - name: Download Slack Installation Package
+      get_url:
+        url: https://downloads.slack-edge.com/linux_releases/slack-desktop-4.22.0-amd64.deb
+        dest: /tmp/slack.deb
+
+    - name: Install Dependencies (if required)
+      apt:
+        name: libappindicator1 libindicator7
+        state: present
+
+    - name: Install Slack
+      shell: dpkg -i /tmp/slack.deb
+
+- name: Chrome
+  block:
+    - name: Download Google Chrome Installation Package
+      get_url:
+        url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        dest: /tmp/google-chrome.deb
+
+    - name: Install Google Chrome
+      shell: dpkg -i /tmp/google-chrome.deb
+
+
+- name: Visual Studio Code
+  block:
+    - name: Download Visual Studio Code Installer
+      win_get_url:
+        url: https://vscode-update.azurewebsites.net/latest/win32-x64/stable
+        dest: C:\Temp\VSCodeSetup.exe
+
+    - name: Install Visual Studio Code
+      win_command: C:\Temp\VSCodeSetup.exe /verysilent /norestart
+
+
+- name: Zoom
+  block:
+    - name: Download Zoom Installer
+      get_url:
+        url: https://zoom.us/client/latest/zoom_amd64.deb
+        dest: /tmp/zoom_amd64.deb
+
+    - name: Install Zoom
+      shell: dpkg -i /tmp/zoom_amd64.deb
+
+    - name: Cleanup Zoom Installer
+      file:
+        path: /tmp/zoom_amd64.deb
+        state: absent
+
+- name: Azure CLI
+  block:
+    - name: Download Azure CLI installation script
+      get_url:
+        url: https://aka.ms/InstallAzureCLIDeb
+        dest: /tmp/install_azure_cli.sh
+
+    - name: Make installation script executable
+      file:
+        path: /tmp/install_azure_cli.sh
+        mode: +x
+
+    - name: Run Azure CLI installation script
+      shell: /tmp/install_azure_cli.sh
+      register: azure_cli_install_result
+      ignore_errors: yes
+
+    - name: Clean up installation script
+      file:
+        path: /tmp/install_azure_cli.sh
+        state: absent
+
+
+- name: GCP CLI
+  block:
+    - name: Download GCP CLI Installation Script
+      get_url:
+        url: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-install.sh
+        dest: /tmp/google-cloud-sdk-install.sh
+
+    - name: Make installation script executable
+      file:
+        path: /tmp/google-cloud-sdk-install.sh
+        mode: +x
+
+    - name: Run GCP CLI Installation Script
+      shell: /tmp/google-cloud-sdk-install.sh
+      register: gcp_cli_install_result
+
+    - name: Clean up installation script
+      file:
+        path: /tmp/google-cloud-sdk-install.sh
+        state: absent
