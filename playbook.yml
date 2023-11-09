@@ -1,0 +1,46 @@
+---
+- name: Setup Ubuntu 20.04 Machine
+  hosts: localhost
+  become: true
+  vars_files:
+    - vars.yml
+  pre_tasks:
+    - name: Get DEB architecture
+      shell: dpkg --print-architecture
+      register: deb_architecture_result
+    
+    - name: Set DEB architecture as a fact
+      set_fact:
+        deb_architecture: "{{ deb_architecture_result.stdout }}"
+
+    - name: Get LSB release number
+      shell: lsb_release -rs
+      register: lsb_release_number_result
+
+    - name: Set LSB release number as a fact
+      set_fact:
+        lsb_release_number: "{{ lsb_release_number_result.stdout }}"
+
+    - name: Get LSB release name
+      shell: lsb_release -cs
+      register: lsb_release_name_result
+
+    - name: Set LSB release name as a fact
+      set_fact:
+        lsb_release_name: "{{ lsb_release_name_result.stdout }}"
+
+    - name: Update and upgrade APT packages
+      apt:
+        update_cache: yes
+        upgrade: safe
+  roles:
+    - devops-tools
+
+  tasks:
+    - name: Clean APT cache
+      apt:
+        autoclean: yes
+        autoremove: yes
+        
+    - name: Cleanup wget log files
+      shell: rm -f wget-log*

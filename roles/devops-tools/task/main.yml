@@ -1,0 +1,29 @@
+---
+- name: Install kubectl if not present
+  block:
+    - name: Download kubectl binary
+      ansible.builtin.shell: |
+        curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.28.3/2023-11-02/bin/linux/amd64/kubectl
+      args:
+        chdir: "{{ ansible_env.HOME }}/bin"
+      creates: "{{ ansible_env.HOME }}/bin/kubectl"
+
+    - name: Verify kubectl binary checksum
+      ansible.builtin.shell: |
+        sha256sum -c kubectl.sha256
+      args:
+        chdir: "{{ ansible_env.HOME }}/bin"
+      creates: "{{ ansible_env.HOME }}/bin/kubectl"
+
+    - name: Set executable permissions for kubectl
+      ansible.builtin.shell: chmod +x ./kubectl
+      args:
+        chdir: "{{ ansible_env.HOME }}/bin"
+      creates: "{{ ansible_env.HOME }}/bin/kubectl"
+
+    - name: Add kubectl to PATH
+      ansible.builtin.shell: echo 'export PATH="{{ ansible_env.HOME }}/bin:$PATH"' >> "{{ ansible_env.HOME }}/.bashrc"
+      args:
+        creates: "{{ ansible_env.HOME }}/.bashrc"
+
+  when: kubectl_version.rc != 0
