@@ -1,0 +1,3 @@
+---
+prereq_pkgs: [ bash-completion, apt-transport-https, gpg-agent ]
+running_on_molecule: no

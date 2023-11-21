@@ -1,0 +1,61 @@
+---
+- hosts: all
+  roles:
+
+    - role: debug
+      tags: debug
+
+    - role: git
+      tags:
+        - common
+
+    - role: docker
+      tags:
+        - devops
+        - changed
+
+    - role: azure_cli
+      tags:
+        - devops
+
+    - role: google_cloud
+      tags:
+        - devops
+
+    - role: virtual_box
+      tags:
+        - devops
+        - vbox
+
+    - role: vagrant
+      tags:
+        - devops
+
+    - role: terraform
+      tags:
+        - devops
+
+    - role: kubectl
+      tags:
+        - devops
+
+    - role: helm
+      tags:
+        - devops
+
+    - role: vs_code
+      tags:
+        - devops
+
+    - role: browsers
+      tags:
+        - common
+
+    - role: misc
+
+    - role: multiboot
+
+    - role: virtualenv
+      become: no
+
+    - role: ohmyzsh

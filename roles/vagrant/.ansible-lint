@@ -1,0 +1,6 @@
+---
+warn_list:
+  - '208'
+  - '503'
+exclude_paths:
+  - ./molecule

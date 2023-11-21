@@ -1,0 +1,26 @@
+---
+- name: Install Pre-reqs
+  become: true
+  apt:
+    name: "{{ prereq_pkgs }}"
+    state: present
+    update_cache: yes
+
+- name: Add spotify apt key
+  become: true
+  apt_key:
+    url: https://download.spotify.com/debian/{{ spotify_pub_key }}
+    state: present
+
+- name: Add spotify repo
+  become: true
+  apt_repository:
+    repo: deb http://repository.spotify.com stable non-free
+
+- name: Install spotify client
+  become: true
+  apt:
+    name: spotify-client
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600

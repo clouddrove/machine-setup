@@ -1,0 +1,13 @@
+---
+- name: Install pre-requisites
+  become: true
+  apt:
+    name: "{{ prereq_pkgs }}"
+    state: present
+    update_cache: yes
+
+- name: Install multiboot .deb file.
+  become: true
+  apt:
+    deb: "{{ download_url }}"
+    state: present

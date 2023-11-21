@@ -1,0 +1,31 @@
+---
+- name: Install Pre-requisites
+  become: true
+  apt:
+    name: unzip
+    state: present
+    update_cache: yes
+
+- name: Check Terraform executable exists.
+  stat:
+    path: /usr/local/bin/terraform
+  register: stat_terraform
+
+- name: Download Terraform
+  get_url:
+    url: "{{ terraform_download_url }}"
+    dest: "/var/tmp/{{ terraform_zip }}"
+  when: not stat_terraform.stat.exists
+
+- name: Extract terraform into /usr/local/bin
+  unarchive:
+    src: "/var/tmp/{{ terraform_zip }}"
+    dest: /usr/local/bin/
+    remote_src: "{{ molecule_remote_src }}"
+  when: not stat_terraform.stat.exists
+
+- name: Remove downloaded zip
+  file:
+    path: "/var/tmp/{{ terraform_zip }}"
+    state: absent
+  when: not stat_terraform.stat.exists

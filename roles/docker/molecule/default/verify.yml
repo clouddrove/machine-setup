@@ -1,0 +1,28 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+  - name: Gather package facts
+    package_facts:
+      manager: auto
+
+  - name: Verify Packages
+    assert:
+      that: "'{{ item }}' in ansible_facts.packages"
+    with_items:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+  - name: Docker compose command
+    command: docker-compose --version
+    register: docker_compose_result
+    when: include_compose
+
+  - name: Check docker compose version
+    assert:
+      that: "'{{ compose_version }}' in docker_compose_result.stdout"
+    when: include_compose
+  vars:
+    include_compose: yes
+    compose_version: 1.25.5

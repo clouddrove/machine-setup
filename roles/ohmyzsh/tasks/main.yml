@@ -1,0 +1,19 @@
+---
+- name: Update apt
+  become: true
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install zsh
+  become: true
+  apt:
+    name: zsh
+    state: present
+    update_cache: yes
+
+- name: make zsh the default shell
+  become: yes
+  user:
+    name: "{{ ansible_user_id }}"
+    shell: /bin/zsh

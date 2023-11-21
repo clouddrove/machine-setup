@@ -1,0 +1,5 @@
+---
+- name: Install Vagrant .deb
+  become: true
+  apt:
+    deb: "{{ vagrant_download_url }}"

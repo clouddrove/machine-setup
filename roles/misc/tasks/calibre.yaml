@@ -1,0 +1,22 @@
+---
+- name: Check Path
+  stat:
+    path: /usr/bin/calibre
+  register: cal
+
+- name:  Download Calibre installer script
+  get_url:
+    url: https://download.calibre-ebook.com/linux-installer.sh
+    dest: "{{ calibre_script }}"
+    mode: +x
+  when: not cal.stat.exists
+
+- name: Install calibre
+  command:
+    cmd: "{{ calibre_script }}"
+    creates: /usr/bin/calibre
+
+- name: Remove Calibre installer script
+  file:
+    path: "{{ calibre_script }}"
+    state: absent

@@ -1,0 +1,148 @@
+---
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron:  '30 20 * * 5'
+  workflow_dispatch:
+
+jobs:
+  set-role-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-role-matrix
+        run: |
+          sudo apt-get install jq && \
+          roles=$(ls roles/ | jq -R . | jq -cs . | sed 's~"~\"~g')
+          echo "roles: $roles"
+          echo "::set-output name=matrix::$roles"
+    outputs:
+      matrix: ${{ (steps.set-role-matrix.outputs.matrix) }}
+
+  init-scripts:
+    name: Init scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repo.
+        uses: actions/checkout@v2
+
+      - name: Set up python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Run init script
+        run: ./scripts/install.sh
+        env:
+          PY_COLORS: '1'
+
+  lint:
+    name: Molecule lint
+    runs-on: ubuntu-latest
+    needs:
+      - set-role-matrix
+    strategy:
+      matrix:
+        role: ${{ fromJson(needs.set-role-matrix.outputs.matrix) }}
+    steps:
+      - name: Check out git repo.
+        uses: actions/checkout@v2
+
+      - name: Set up python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies
+        run: make requirements
+
+      - name: Test ${{ matrix.role }} role
+        run: cd roles/${{ matrix.role }} && molecule lint
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ubuntu:20.04
+
+  host-test-changed:
+    name: Host ansible run - changed tags
+    if: ${{ github.ref != 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    needs:
+      - init-scripts
+      - lint
+    steps:
+      - name: Check out git repo.
+        uses: actions/checkout@v2
+
+      - name: Set up python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Run ansible playbook
+        run: |
+              set -e
+              make install-changed
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+
+  host-test:
+    name: Host ansible run
+    runs-on: ubuntu-latest
+    needs:
+      - host-test-changed
+    if: always()
+    steps:
+      - name: Check out git repo.
+        uses: actions/checkout@v2
+
+      - name: Set up python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Run ansible playbook
+        run: |
+              set -e
+              make install
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+
+  molecule-test:
+    name: Molecule
+    runs-on: ubuntu-latest
+    needs:
+      - host-test-changed
+      - set-role-matrix
+    if: always()
+    strategy:
+      matrix:
+        distro:
+          - ubuntu:20.04
+          - linuxmintd/mint20.2-amd64
+        role: ${{fromJson(needs.set-role-matrix.outputs.matrix)}}
+
+    steps:
+      - name: Check out git repo.
+        uses: actions/checkout@v2
+
+      - name: Set up python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies
+        run: make requirements
+
+      - name: Test ${{ matrix.role }} role
+        run: cd roles/${{ matrix.role }} && molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}

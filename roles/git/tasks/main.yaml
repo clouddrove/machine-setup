@@ -1,0 +1,19 @@
+---
+- name: Install git
+  become: true
+  apt:
+    name: git
+    state: present
+    update_cache: yes
+
+- name: Create user dir
+  file:
+    path: /home/{{ ansible_user }}
+    state: directory
+
+- name: Copy git config
+  template:
+    src: gitconfig.j2
+    dest: "/home/{{ ansible_user }}/.gitconfig"
+    owner: "{{ ansible_user }}"
+    mode: 0640

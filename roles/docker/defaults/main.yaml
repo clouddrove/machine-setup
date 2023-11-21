@@ -1,0 +1,5 @@
+---
+running_on_molecule: no
+
+include_compose: yes
+compose_version: 1.25.5

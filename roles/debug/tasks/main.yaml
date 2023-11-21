@@ -1,0 +1,4 @@
+---
+- name: Target Machine
+  debug:
+    msg: "Distro: {{ ansible_distribution }} Release: {{ ansible_distribution_release }}"
