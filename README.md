@@ -1,6 +1,5 @@
 # Machine Tools  Setup
 
-![CI](https://github.com/g1212/machine_setup/workflows/CI/badge.svg?branch=master)
 
 Ansible repo designed to set up machine with necessary Dev(Ops) tooling.
 Included various browsers, spotify and calibre for convenience.  

@@ -14,18 +14,9 @@
         - devops
         - changed
 
-    - role: azure_cli
+    - role: aws_cli
       tags:
         - devops
-
-    - role: google_cloud
-      tags:
-        - devops
-
-    - role: virtual_box
-      tags:
-        - devops
-        - vbox
 
     - role: vagrant
       tags:
