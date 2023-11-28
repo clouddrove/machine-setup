@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include vs_code"
+      include_role:
+        name: "vs_code"
+  vars:
+    user_data_dir: "--user-data-dir /root"

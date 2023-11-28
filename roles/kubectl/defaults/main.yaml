@@ -1,0 +1,4 @@
+---
+prereq_pkgs: [ apt-transport-https, gnupg2, bash-completion]
+kubectx: yes
+kubectx_dir: "/home/{{ ansible_user }}/.kubectx"

@@ -1,0 +1,4 @@
+---
+zsh_url: https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+zsh_script_dest: /var/tmp
+zsh_script_file: zsh_install.sh

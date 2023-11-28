@@ -1,0 +1,7 @@
+---
+calibre: yes
+calibre_script: /var/tmp/linux-installer.sh
+spotify: yes
+prereq_pkgs: [ gpg-agent ]
+running_on_molecule: no
+spotify_pub_key: pubkey_5E3C45D7B312C643.gpg

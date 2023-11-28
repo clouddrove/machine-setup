@@ -1,0 +1,5 @@
+---
+- include: calibre.yaml
+  when: calibre
+
+- include: spotify.yaml

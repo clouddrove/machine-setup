@@ -1,0 +1,6 @@
+---
+- name: Install Code Extensions
+  become: no
+  command: "/usr/bin/code --install-extension {{ item }} {{ user_data_dir }}"
+  loop: "{{ code_extensions }}"
+  changed_when: false

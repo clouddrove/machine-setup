@@ -1,6 +1,0 @@
----
-- include: "git.yml"
-- include: "pip.yml"
-- include: "sublime.yml"
-- include: "file.yml"
-- include: "terminal.yml"
