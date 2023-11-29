@@ -1,1 +1,17 @@
 ---
+ansible_python_interpreter: /usr/bin/python3
+ansible_user: ubuntu
+ansible_ssh_private_key_file: /home/vaibhav/Downloads/ubuntu-test07.pem
+awscli_url:
+  https://awscli.amazonaws.com/awscli-exe-linux-x86_64-{{ awscli_version }}.zip
+awscli_version: "2.13.0"
+awscli_signature_url: "{{ awscli_url }}.sig"
+awscli_download_path: /tmp
+
+os_packages_debian:
+  - curl
+  - gpg-agent
+  - groff
+  - less
+  - libc6
+  - unzip

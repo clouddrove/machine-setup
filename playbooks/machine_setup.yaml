@@ -1,52 +1,22 @@
 ---
 - hosts: all
+  vars_files:
+    - /home/inventory/host_vars/localhost.yaml
   roles:
 
     - role: debug
       tags: debug
 
-    - role: git
-      tags:
-        - common
-
-    - role: docker
-      tags:
-        - devops
-        - changed
-
-    - role: aws_cli
-      tags:
-        - devops
-
-    - role: vagrant
-      tags:
-        - devops
-
-    - role: terraform
-      tags:
-        - devops
-
-    - role: kubectl
-      tags:
-        - devops
-
-    - role: helm
-      tags:
-        - devops
-
-    - role: vs_code
+    - role: common
       tags:
         - devops
 
     - role: browsers
       tags:
-        - common
+        - web
 
     - role: misc
 
-    - role: multiboot
-
-    - role: virtualenv
-      become: no
-
     - role: ohmyzsh
+
+    - role: communication

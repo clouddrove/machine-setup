@@ -1,5 +1,0 @@
----
-terraform_version: 0.12.25
-terraform_zip: "terraform_{{ terraform_version}}_linux_amd64.zip"
-terraform_download_url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/{{ terraform_zip }}"
-molecule_remote_src: no

@@ -1,0 +1,23 @@
+---
+- name: Install pre-requisites
+  become: true
+  apt:
+    name: gnupg
+    state: present
+    update_cache: yes
+
+- name: Install Slack
+  become: true
+  apt: deb=http://ftp.us.debian.org/debian/pool/main/liba/libappindicator/libappindicator3-1_0.4.92-7_amd64.deb
+
+- name: Install zoom
+  become: true
+  apt: deb=https://zoom.us/client/latest/zoom_amd64.deb
+
+- name: Add Telegram repository
+  become: true
+  apt_repository: repo='ppa:atareao/telegram'
+
+- name: Install Telegram
+  become: true
+  package: name=telegram

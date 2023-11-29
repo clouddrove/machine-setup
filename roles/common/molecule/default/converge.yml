@@ -1,0 +1,13 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include common"
+      include_role:
+        name: "common"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    running_on_molecule: yes
+    ansible_user: root
+    molecule_remote_src: yes
+    user_data_dir: "--user-data-dir /root"
