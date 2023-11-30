@@ -10,6 +10,7 @@ install-changed:
 
 
 requirements:
+	pip install --upgrade pip
 	pip3 install -r roles/common/files/requirements.txt
 
 debug:

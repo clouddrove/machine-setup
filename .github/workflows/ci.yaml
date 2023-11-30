@@ -58,7 +58,6 @@ jobs:
       - name: Install molecule & lint.
         run: |
           pip install molecule
-          npm i -g lint
 
       - name: Install test dependencies
         run: make requirements
