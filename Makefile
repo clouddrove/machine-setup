@@ -10,7 +10,7 @@ install-changed:
 
 
 requirements:
-	pip3 install -r roles/virtualenv/files/requirements.txt
+	pip3 install -r roles/common/files/requirements.txt
 
 debug:
 	ansible-playbook \
