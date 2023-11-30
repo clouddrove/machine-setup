@@ -55,25 +55,19 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: molecule
-        uses: robertdebock/molecule-action@6.0.0
-        run: cd roles/${{ matrix.role }}
-        with:
-          command: lint
+      - name: Install molecule & lint.
+        run: |
+          pip install molecule
+
+      - name: Install test dependencies
+        run: make requirements
+
+      - name: Test ${{ matrix.role }} role
+        run: cd roles/${{ matrix.role }} && lint
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ubuntu:20.04
-          
-      - name: Install test dependencies
-        run: make requirements
-
-      # - name: Test ${{ matrix.role }} role
-      #   run: cd roles/${{ matrix.role }} && molecule lint
-      #   env:
-      #     PY_COLORS: '1'
-      #     ANSIBLE_FORCE_COLOR: '1'
-      #     MOLECULE_DISTRO: ubuntu:20.04
 
   host-test-changed:
     name: Host ansible run - changed tags
