@@ -21,7 +21,7 @@
       - git      
   vars:
     ansible_user: root
-    
+
   - name: Docker compose command
     command: docker-compose --version
     register: docker_compose_result
