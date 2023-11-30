@@ -36,6 +36,7 @@ function installer_virtualenv() {
      virtualenv /home/${user}/.installer
      source /home/${user}/.installer/bin/activate
      pip3 install ansible==2.10.3
+     pip3 install ansible==2.10.3 six
      ansible --version
 }
 
