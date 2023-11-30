@@ -94,7 +94,7 @@
     update_cache: yes
 
 - name: Create kubectl dir
-  become: no
+  become: yes
   file:
     state: directory
     path: "/home/{{ ansible_user }}/.kube"
