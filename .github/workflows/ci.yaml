@@ -63,7 +63,7 @@ jobs:
         run: make requirements
 
       # - name: Test ${{ matrix.role }} role
-      #   run: cd roles/${{ matrix.role }} && lint
+      #   run: cd roles/${{ matrix.role }} && molecule lint
       #   env:
       #     PY_COLORS: '1'
       #     ANSIBLE_FORCE_COLOR: '1'
