@@ -55,10 +55,8 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install molecule & lint.
-        run: |
-          pip install molecule
-          python3 -m pip install --user molecule ansible-lint
+      - name: Ansible Molecule Test
+        uses: onaio/molecule-action@master
 
       - name: Install test dependencies
         run: make requirements
