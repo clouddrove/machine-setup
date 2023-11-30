@@ -55,6 +55,9 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Check out git repo.
+        run: pip install molecule
+
       # - name: Install test dependencies
       #   run: make requirements
 
