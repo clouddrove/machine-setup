@@ -105,12 +105,12 @@
   copy:
     content: ""
     dest: "/home/{{ ansible_user }}/.kube/config"
-    force: no
+    force: yes
     group: "{{ ansible_user }}"
     owner: "{{ ansible_user }}"
     mode: '0644'
 
-- name: Ensure autocompletion dirs exist.
+- name: Ensure autocompletion dirs exist. 
   file:
     path: /etc/bash_completion.d
     recurse: no

@@ -21,3 +21,7 @@
 - name: Install Telegram
   become: true
   package: name=telegram
+
+- name: Install Lens
+  become: true
+  apt: deb=telegram
