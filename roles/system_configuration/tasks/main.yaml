@@ -1,9 +1,9 @@
 ---
-- name: Generate SSH key for user "{{ local_user }}"
-  openssh_keypair:
-    path: "~/.ssh/id_rsa"
-    type: rsa
-    size: 4096
-    state: present
-    force: no
-  become: false  # Ensure this runs as your user
+# - name: Generate SSH key for user "{{ local_user }}"
+#   openssh_keypair:
+#     path: "~/.ssh/id_rsa"
+#     type: rsa
+#     size: 4096
+#     state: present
+#     force: no
+#   become: false  # Ensure this runs as your user
