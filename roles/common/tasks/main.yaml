@@ -379,28 +379,26 @@
   #-------------------------------------------------------#
   #------------------------Lens-------------------------#
 
-- name: Add Lens Desktop repository and install
-  become: true
-  tasks:
-    - name: Get the Lens Desktop public security key
-      command: curl -fsSL https://downloads.k8slens.dev/keys/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/lens-archive-keyring.gpg > /dev/null
+- name: Get the Lens Desktop public security key
+  command: curl -fsSL https://downloads.k8slens.dev/keys/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/lens-archive-keyring.gpg > /dev/null
 
-    - name: Add the Lens Desktop repo
-      lineinfile:
-        path: /etc/apt/sources.list.d/lens.list
-        line: "deb [arch=amd64 signed-by=/usr/share/keyrings/lens-archive-keyring.gpg] https://downloads.k8slens.dev/apt/debian stable main"
-        create: yes
+- name: Add the Lens Desktop repo
+  lineinfile:
+    path: /etc/apt/sources.list.d/lens.list
+    line: "deb [arch=amd64 signed-by=/usr/share/keyrings/lens-archive-keyring.gpg] https://downloads.k8slens.dev/apt/debian stable main"
+    create: yes
 
-    - name: Specify the stable channel
-      blockinfile:
-        path: /etc/apt/preferences.d/lens
-        content: |
-          Package: *
-          Pin: release a=stable
-          Pin-Priority: 800
+- name: Specify the stable channel
+  copy:
+    content: |
+      Package: *
+      Pin: release a=stable
+      Pin-Priority: 800
+    dest: /etc/apt/preferences.d/lens
+    mode: '0644'
 
-    - name: Install or update Lens Desktop
-      apt:
-        update_cache: yes
-        name: lens
-        state: present
+- name: Install or update Lens Desktop
+  apt:
+    update_cache: yes
+    name: lens
+    state: present
