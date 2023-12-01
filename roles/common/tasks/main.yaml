@@ -94,14 +94,13 @@
     update_cache: yes
 
 - name: Create kubectl dir
-  become: yes
+  become: true
   file:
     state: directory
     path: "/home/{{ ansible_user }}/.kube"
     mode: '0744'
 
 - name: Create kubeconfig file
-  become: true
   copy:
     content: ""
     dest: "/home/{{ ansible_user }}/.kube/config"
@@ -263,7 +262,7 @@
   #------------------------vs_code-------------------------#
 
 - name: Install Code Extensions
-  become: no
+  become: false
   command: "/usr/bin/code --install-extension {{ item }} {{ user_data_dir }}"
   loop: "{{ code_extensions }}"
   changed_when: false

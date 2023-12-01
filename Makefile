@@ -20,28 +20,28 @@ debug:
 		--tags debug \
 		playbooks/machine_setup.yaml
 
-ubuntu18:
-	@vagrant up ubuntu_bionic --provision
+# ubuntu18:
+# 	@vagrant up ubuntu_bionic --provision
 
-ubuntu20:
-	@vagrant up ubuntu_focal --provision
-
-
-clean-ubuntu18:
-	@vagrant destroy ubuntu_bionic -f
-
-clean-ubuntu20:
-	@vagrant destroy ubuntu_focal -f
+# ubuntu20:
+# 	@vagrant up ubuntu_focal --provision
 
 
-con-ubuntu18:
-	@vagrant ssh ubuntu_bionic
+# clean-ubuntu18:
+# 	@vagrant destroy ubuntu_bionic -f
 
-con-ubuntu20:
-	@vagrant ssh ubuntu_focal
+# clean-ubuntu20:
+# 	@vagrant destroy ubuntu_focal -f
 
-down-ubuntu18:
-	@vagrant suspend ubuntu_bionic
 
-down-ubuntu20:
-	@vagrant suspend ubuntu_focal
+# con-ubuntu18:
+# 	@vagrant ssh ubuntu_bionic
+
+# con-ubuntu20:
+# 	@vagrant ssh ubuntu_focal
+
+# down-ubuntu18:
+# 	@vagrant suspend ubuntu_bionic
+
+# down-ubuntu20:
+# 	@vagrant suspend ubuntu_focal
