@@ -344,3 +344,63 @@
     requirements: /var/tmp/requirements.txt
     virtualenv_python: python3
     virtualenv: ~/.virtualenvs/molecule
+
+  #-------------------------------------------------------#
+  #------------------------minikube-------------------------#
+
+- name: Download Minikube binary
+  become: true
+  get_url:
+    url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    dest: /usr/local/bin/minikube
+    mode: '0755'
+
+- name: Verify Minikube installation
+  become: true
+  stat:
+    path: /usr/local/bin/minikube
+
+- name: Print Minikube version
+  become: true
+  command: minikube version
+  register: minikube_version
+  changed_when: false
+
+- name: Print Minikube version information
+  debug:
+    var: minikube_version.stdout_lines
+
+- name: Clean up downloaded Minikube binary
+  become: true
+  file:
+    path: /usr/local/bin/minikube-linux-amd64
+    state: absent
+
+  #-------------------------------------------------------#
+  #------------------------Lens-------------------------#
+
+- name: Add Lens Desktop repository and install
+  become: true
+  tasks:
+    - name: Get the Lens Desktop public security key
+      command: curl -fsSL https://downloads.k8slens.dev/keys/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/lens-archive-keyring.gpg > /dev/null
+
+    - name: Add the Lens Desktop repo
+      lineinfile:
+        path: /etc/apt/sources.list.d/lens.list
+        line: "deb [arch=amd64 signed-by=/usr/share/keyrings/lens-archive-keyring.gpg] https://downloads.k8slens.dev/apt/debian stable main"
+        create: yes
+
+    - name: Specify the stable channel
+      blockinfile:
+        path: /etc/apt/preferences.d/lens
+        content: |
+          Package: *
+          Pin: release a=stable
+          Pin-Priority: 800
+
+    - name: Install or update Lens Desktop
+      apt:
+        update_cache: yes
+        name: lens
+        state: present
