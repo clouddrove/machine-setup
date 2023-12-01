@@ -14,8 +14,8 @@ The playbook currently installs the following:
 * Docker
 * Docker-compose
 * Azure CLI
+* AWS CLI
 * Bash-it
-* Vagrant
 * Terraform
 * Kubectl
 * Helm
@@ -25,8 +25,11 @@ The playbook currently installs the following:
 * Chrome
 * Brave
 * Tor
-* Calibre
 * Spotify
+* Telegram
+* Zoom
+* Slack
+* 
 
 
 

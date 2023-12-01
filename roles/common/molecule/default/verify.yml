@@ -2,49 +2,50 @@
 - name: Verify
   hosts: all
   tasks:
+    - name: Gather package facts
+      package_facts:
+        manager: auto
 
-- name: Gather package facts
-  package_facts:
-    manager: auto
+    - name: Verify Packages
+      assert:
+        that: "'{{ item }}' in ansible_facts.packages"
+      with_items:
+        - aws-cli
+        - helm
+        - kubectl
+        - docker
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - git
 
-- name: Verify Packages
-  assert:
-    that: "'{{ item }}' in ansible_facts.packages"
-  with_items:
-    - aws-cli
-    - helm
-    - kubectl
-    - docker
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
-    - git
-vars:
-  ansible_user: root
+  vars:
+    ansible_user: root
+  tasks:
+    - name: Docker compose command
+      command: docker-compose --version
+      register: docker_compose_result
+      when: include_compose
 
-  # - name: Docker compose command
-  #   command: docker-compose --version
-  #   register: docker_compose_result
-  #   when: include_compose
+    - name: Check docker compose version
+      assert:
+        that: "'{{ compose_version }}' in docker_compose_result.stdout"
+      when: include_compose
+  vars:
+    include_compose: yes
+    compose_version: 1.25.5
 
-  # - name: Check docker compose version
-  #   assert:
-  #     that: "'{{ compose_version }}' in docker_compose_result.stdout"
-  #   when: include_compose
-  # vars:
-  #   include_compose: yes
-  #   compose_version: 1.25.5
+  tasks:
+    - name: Check that the gitconfig exists
+      stat:
+        path: "/home/{{ ansible_user }}/.gitconfig"
+      register: stat_result
 
-  - name: Check that the gitcconfig exists
-    stat:
-      path: "/home/{{ ansible_user }}/.gitconfig"
-    register: stat_result
+    - name: Assert file exists
+      assert:
+        that:
+          - stat_result.stat.exists
 
-  - name: Assert file exists
-    assert:
-      that:
-        - stat_result.stat.exists
-
-  - name: Example assertion
-    assert:
-      that: true
+    - name: Example assertion
+      assert:
+        that: true
