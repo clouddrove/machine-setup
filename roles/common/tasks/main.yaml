@@ -63,6 +63,27 @@
   become: true
   shell: "/tmp/aws/install --update"
 
+  #-------------------------------------------------------#
+  #------------------------git-------------------------#
+
+- name: Install git
+  become: true
+  ansible.builtin.apt:
+    name: git
+    state: present
+    update_cache: yes
+
+- name: Create user dir
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}
+    state: directory
+
+- name: Copy git config
+  ansible.builtin.template:
+    src: gitconfig.j2
+    dest: "/home/{{ ansible_user }}/.gitconfig"
+    owner: "{{ ansible_user }}"
+    mode: 0640
 
 #--------------------------------------------------#
 #--------------kubectl-----------------------------#
@@ -101,6 +122,7 @@
     mode: '0744'
 
 - name: Create kubeconfig file
+  become: true
   copy:
     content: ""
     dest: "/home/{{ ansible_user }}/.kube/config"
@@ -110,6 +132,7 @@
     mode: '0644'
 
 - name: Ensure autocompletion dirs exist.
+  become: true
   file:
     path: /etc/bash_completion.d
     recurse: no
@@ -121,7 +144,7 @@
   shell: kubectl completion bash > /etc/bash_completion.d/kubectl
   changed_when: false
 
-- import_tasks: kubectx.yaml
+- include_tasks: kubectx.yaml
   when: kubectx
 
 #---------------------------------------------------#
@@ -320,24 +343,3 @@
     virtualenv_python: python3
     virtualenv: ~/.virtualenvs/molecule
 
-  #-------------------------------------------------------#
-  #------------------------git-------------------------#
-
-- name: Install git
-  become: true
-  ansible.builtin.apt:
-    name: git
-    state: present
-    update_cache: yes
-
-- name: Create user dir
-  ansible.builtin.file:
-    path: /home/{{ ansible_user }}
-    state: directory
-
-- name: Copy git config
-  ansible.builtin.template:
-    src: gitconfig.j2
-    dest: "/home/{{ ansible_user }}/.gitconfig"
-    owner: "{{ ansible_user }}"
-    mode: 0640
