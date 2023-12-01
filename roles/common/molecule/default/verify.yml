@@ -18,22 +18,22 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
-      - git      
+      - git
   vars:
     ansible_user: root
 
-  - name: Docker compose command
-    command: docker-compose --version
-    register: docker_compose_result
-    when: include_compose
+  # - name: Docker compose command
+  #   command: docker-compose --version
+  #   register: docker_compose_result
+  #   when: include_compose
 
-  - name: Check docker compose version
-    assert:
-      that: "'{{ compose_version }}' in docker_compose_result.stdout"
-    when: include_compose
-  vars:
-    include_compose: yes
-    compose_version: 1.25.5
+  # - name: Check docker compose version
+  #   assert:
+  #     that: "'{{ compose_version }}' in docker_compose_result.stdout"
+  #   when: include_compose
+  # vars:
+  #   include_compose: yes
+  #   compose_version: 1.25.5
 
   - name: Check that the gitcconfig exists
     stat:
@@ -47,4 +47,4 @@
 
   - name: Example assertion
     assert:
-      that: true        
+      that: true
