@@ -7,20 +7,20 @@
   package_facts:
     manager: auto
 
-  - name: Verify Packages
-    assert:
-      that: "'{{ item }}' in ansible_facts.packages"
-    with_items:
-      - aws-cli
-      - helm
-      - kubectl
-      - docker
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - git
-  vars:
-    ansible_user: root
+- name: Verify Packages
+  assert:
+    that: "'{{ item }}' in ansible_facts.packages"
+  with_items:
+    - aws-cli
+    - helm
+    - kubectl
+    - docker
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - git
+vars:
+  ansible_user: root
 
   # - name: Docker compose command
   #   command: docker-compose --version
