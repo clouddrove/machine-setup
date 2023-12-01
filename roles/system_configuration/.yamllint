@@ -37,6 +37,3 @@ rules:
       - 'false'
       - 'yes'
       - 'no'
-yaml-files:
-  - '*.yml'
-  - '.yamllint'

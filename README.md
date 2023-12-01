@@ -29,7 +29,9 @@ The playbook currently installs the following:
 * Telegram
 * Zoom
 * Slack
-* 
+* Minikube
+* Lens
+* SSH Keys
 
 
 

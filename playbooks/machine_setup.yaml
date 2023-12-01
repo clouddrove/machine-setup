@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars_files:
-    - /home/inventory/host_vars/localhost.yaml
+    - /home/vaibhav/workspace/INTERNAL-PROJECTS/ubuntu-setup/inventory/host_vars/localhost.yaml
   roles:
 
     - role: debug
@@ -18,3 +18,5 @@
     - role: terminal-shell-configuration
 
     - role: communication
+
+    - role: system_configuration

@@ -332,7 +332,7 @@
     path: ~/.virtualenvs/molecule
     state: directory
     mode: "0755"
-
+ 
 - name: Copy requirements
   copy:
     src: requirements.txt
@@ -380,15 +380,18 @@
   #------------------------Lens-------------------------#
 
 - name: Get the Lens Desktop public security key
-  command: curl -fsSL https://downloads.k8slens.dev/keys/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/lens-archive-keyring.gpg > /dev/null
+  become: true
+  shell: curl -fsSL https://downloads.k8slens.dev/keys/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/lens-archive-keyring.gpg > /dev/null
 
 - name: Add the Lens Desktop repo
+  become: true
   lineinfile:
     path: /etc/apt/sources.list.d/lens.list
     line: "deb [arch=amd64 signed-by=/usr/share/keyrings/lens-archive-keyring.gpg] https://downloads.k8slens.dev/apt/debian stable main"
     create: yes
 
 - name: Specify the stable channel
+  become: true
   copy:
     content: |
       Package: *
@@ -398,6 +401,7 @@
     mode: '0644'
 
 - name: Install or update Lens Desktop
+  become: true
   apt:
     update_cache: yes
     name: lens
