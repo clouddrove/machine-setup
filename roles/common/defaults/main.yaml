@@ -14,7 +14,7 @@ molecule_remote_src: yes
 install_extensions: no
 code_extensions: [eamodio.gitlens, hashicorp.terraform, ivory-lab.jenkinsfile-support, ms-azuretools.vscode-docker, ms-kubernetes-tools.vscode-kubernetes-tools, ms-python.python, redhat.vscode-yaml]
 running_on_molecule: no
-user_data_dir: ""
+user_data_dir: "/usr/bin/code"
 #docker
 include_compose: yes
 compose_version: 1.25.5

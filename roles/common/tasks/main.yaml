@@ -74,11 +74,13 @@
     update_cache: yes
 
 - name: Create user dir
+  become: true
   ansible.builtin.file:
     path: /home/{{ ansible_user }}
     state: directory
 
 - name: Copy git config
+  become: true
   ansible.builtin.template:
     src: gitconfig.j2
     dest: "/home/{{ ansible_user }}/.gitconfig"
@@ -284,36 +286,36 @@
   #-------------------------------------------------------#
   #------------------------vs_code-------------------------#
 
-- name: Install Code Extensions
-  become: false
-  command: "/usr/bin/code --install-extension {{ item }} {{ user_data_dir }}"
-  loop: "{{ code_extensions }}"
-  changed_when: false
+# - name: Install Code Extensions
+#   become: false
+#   command: "/usr/bin/code --install-extension {{ item }} {{ user_data_dir }}"
+#   loop: "{{ code_extensions }}"
+#   changed_when: false
 
-- name: Install pre-requisites
-  become: true
-  apt:
-    name: "{{ prereq_pkgs }}"
-    state: present
-    update_cache: yes
+# - name: Install pre-requisites
+#   become: true
+#   apt:
+#     name: "{{ prereq_pkgs }}"
+#     state: present
+#     update_cache: yes
 
-- name: Install VS Code
-  become: true
-  apt:
-    deb: https://go.microsoft.com/fwlink/?LinkID=760868
-    state: present
-    update_cache: yes
-    cache_valid_time: 3600
+# - name: Install VS Code
+#   become: true
+#   apt:
+#     deb: https://go.microsoft.com/fwlink/?LinkID=760868
+#     state: present
+#     update_cache: yes
+#     cache_valid_time: 3600
 
-- name: Add VisualStudio Code apt keys
-  become: true
-  apt_key: url=https://packages.microsoft.com/keys/microsoft.asc
-- name: Add VisualStudio Code repository
-  become: true
-  apt_repository: repo='deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main'
-- name: Install VisualStudio Code
-  become: true
-  package: name=code
+# - name: Add VisualStudio Code apt keys
+#   become: true
+#   apt_key: url=https://packages.microsoft.com/keys/microsoft.asc
+# - name: Add VisualStudio Code repository
+#   become: true
+#   apt_repository: repo='deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main'
+# - name: Install VisualStudio Code
+#   become: true
+#   package: name=code
 
   #-------------------------------------------------------#
   #------------------------virtual_env-------------------------#
@@ -342,4 +344,3 @@
     requirements: /var/tmp/requirements.txt
     virtualenv_python: python3
     virtualenv: ~/.virtualenvs/molecule
-
