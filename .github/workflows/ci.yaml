@@ -40,7 +40,7 @@ jobs:
 
   lint:
     name: Molecule lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs:
       - set-role-matrix
     strategy:
@@ -57,17 +57,17 @@ jobs:
 
       - name: Install molecule & lint.
         run: |
-          pip install molecule
+          pip3 install ansible molecule[docker] docker yamllint ansible-lint
 
       - name: Install test dependencies
         run: make requirements
 
-      # - name: Test ${{ matrix.role }} role
-      #   run: cd roles/${{ matrix.role }} && molecule lint
-      #   env:
-      #     PY_COLORS: '1'
-      #     ANSIBLE_FORCE_COLOR: '1'
-      #     MOLECULE_DISTRO: ubuntu:20.04
+      - name: Test ${{ matrix.role }} role
+        run: cd roles/${{ matrix.role }} && molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ubuntu:20.04
 
   host-test-changed:
     name: Host ansible run - changed tags
@@ -127,7 +127,6 @@ jobs:
       matrix:
         distro:
           - ubuntu:20.04
-          - linuxmintd/mint20.2-amd64
         role: ${{fromJson(needs.set-role-matrix.outputs.matrix)}}
 
     steps:
@@ -140,7 +139,9 @@ jobs:
           python-version: '3.x'
 
       - name: Install test dependencies
-        run: make requirements
+        run: |
+          make requirements
+          pip3 install ansible molecule[docker] docker yamllint ansible-lint
 
       - name: Test ${{ matrix.role }} role
         run: cd roles/${{ matrix.role }} && molecule test
