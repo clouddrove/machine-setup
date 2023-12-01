@@ -110,7 +110,7 @@
     owner: "{{ ansible_user }}"
     mode: '0644'
 
-- name: Ensure autocompletion dirs exist. 
+- name: Ensure autocompletion dirs exist.
   file:
     path: /etc/bash_completion.d
     recurse: no
@@ -192,7 +192,6 @@
       - docker-ce-cli
       - containerd.io
     state: present
-    
   #-----docker-compose-----#
 
 - name: Download docker-compose

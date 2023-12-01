@@ -3,9 +3,9 @@
   hosts: all
   tasks:
 
-  - name: Gather package facts
-    package_facts:
-      manager: auto
+- name: Gather package facts
+  package_facts:
+    manager: auto
 
   - name: Verify Packages
     assert:
