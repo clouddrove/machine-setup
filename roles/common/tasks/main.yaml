@@ -121,7 +121,7 @@
   shell: kubectl completion bash > /etc/bash_completion.d/kubectl
   changed_when: false
 
-- include: kubectx.yaml
+- import_tasks: kubectx.yaml
   when: kubectx
 
 #---------------------------------------------------#
