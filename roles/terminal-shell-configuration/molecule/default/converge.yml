@@ -2,6 +2,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Include ohmyzsh"
+    - name: "Include terminal-shell-configuration"
       include_role:
-        name: "ohmyzsh"
+        name: "terminal-shell-configuration"
