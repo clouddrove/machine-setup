@@ -13,7 +13,7 @@
     update_cache: yes
 
 - name: make zsh the default shell
-  become: yes
+  become: true
   user:
     name: "{{ ansible_user_id }}"
     shell: /bin/zsh
