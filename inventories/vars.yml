@@ -1,0 +1,28 @@
+---
+ansible_python_interpreter: /usr/bin/python3
+ansible_user: ubuntu
+ansible_ssh_private_key_file: /home/vaibhav/Downloads/ubuntu-07.pem
+
+# Pre-requisits packages
+prereq_pkgs: [ca-certificates, apt-transport-https, lsb-release, gnupg, bash-completion, gnupg2, curl, software-properties-common, virtualenv, python3-setuptools, unzip, libxtst6, libx11-xcb1, libxcb-dri3-0, libasound2, libssl-dev, htop, openssh-server, libssl3]
+
+# Git
+git_user: "vaibhav"
+git_email: "pendharevaibhav@gmail.com"
+
+# Docker
+compose_version: 1.25.5
+
+# Browsers to incldue [brave|chrome|tor]
+browsers:
+  - chrome
+  - brave
+chrome_url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+
+# Communication-tools
+slack_version: 4.4.2
+
+# system configuration (SSH KEY)
+ssh_user: vaibhav
+ssh_keys_key_bits: 4096
+ssh_keys_key_type: "rsa"

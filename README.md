@@ -13,26 +13,20 @@ The playbook currently installs the following:
 * Git
 * Docker
 * Docker-compose
-* Azure CLI
 * AWS CLI
-* Bash-it
 * Terraform
 * Kubectl
 * Helm
 * VS Code
-* Molecule (in virtualenv)
-* Multiboot
 * Chrome
 * Brave
 * Tor
-* Spotify
 * Telegram
 * Zoom
 * Slack
 * Minikube
 * Lens
 * SSH Keys
-
 
 
 ## Getting Started

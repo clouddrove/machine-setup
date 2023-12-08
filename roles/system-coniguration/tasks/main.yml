@@ -1,0 +1,15 @@
+---
+#---------------------------------------------------------------------------#
+#------------------------SSH-KEY--------------------------------------------#
+
+- name: Generate an SSH key pair for the "{{ ssh_user }}"
+  become: true
+  ansible.builtin.openssh_keypair:
+    path: "/home/{{ ansible_user }}/.ssh/{{ ssh_user }}"
+    type: "{{ ssh_keys_key_type }}"
+    size: "{{ ssh_keys_key_bits }}"
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+    state: present
+    force: no
+...

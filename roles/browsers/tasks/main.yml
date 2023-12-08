@@ -1,0 +1,61 @@
+---
+#-----------------------------------------------------------------------#
+#------------------------Brave-Browsers---------------------------------#
+
+- name: Add Brave apt key
+  become: true
+  apt_key:
+    url: https://brave-browser-apt-release.s3.brave.com/brave-core.asc
+    state: present
+    keyring: /etc/apt/trusted.gpg.d/brave-browser-release.gpg
+
+- name: Add Brave repo
+  become: true
+  apt_repository:
+    repo: deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main
+    filename: brave-browser-release
+
+- name: Install Brave
+  become: true
+  apt:
+    name: brave-browser
+    state: present
+    update_cache: yes
+
+#-----------------------------------------------------------------------#
+#------------------------Chrome-Browser---------------------------------#
+
+- name: Install chrome
+  become: true
+  apt:
+    deb: "{{ chrome_url }}"
+    state: present
+
+#-----------------------------------------------------------------------#
+#------------------------Tor-Browser---------------------------------#
+
+- name: Add Tor repo
+  become: true
+  apt_repository:
+    repo: "deb https://deb.torproject.org/torproject.org/ {{ ansible_distribution_release }} main"
+    filename: tor
+    update_cache: no
+
+- name: Add Tor keys
+  become: true
+  apt_key:
+    url: https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc
+    state: present
+    keyring: /etc/apt/trusted.gpg.d/torproject.gpg
+
+- name: Install Tor packages
+  become: true
+  apt:
+    name:
+      - tor
+      - tor-geoipdb
+      - torsocks
+      - deb.torproject.org-keyring
+    state: present
+    update_cache: yes
+...

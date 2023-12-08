@@ -1,5 +1,0 @@
----
-- include_tasks: prereqs.yaml
-
-- include_tasks: "{{ item }}.yaml"
-  loop: "{{ browsers }}"

@@ -1,7 +1,0 @@
----
-- name: Converge
-  hosts: all
-  tasks:
-    - name: "Include terminal-shell-configuration"
-      include_role:
-        name: "terminal-shell-configuration"

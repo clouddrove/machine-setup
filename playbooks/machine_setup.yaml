@@ -1,22 +1,20 @@
 ---
 - hosts: all
   vars_files:
-    - /home/vaibhav/workspace/INTERNAL-PROJECTS/ubuntu-setup/inventory/host_vars/localhost.yaml
+    - /home/vaibhav/workspace/INTERNAL-PROJECTS/ubuntu-setup/inventories/vars.yml
   roles:
-
-    - role: debug
-      tags: debug
-
-    - role: common
+    - role: devops
       tags:
-        - devops
+        - devops-tools
 
     - role: browsers
       tags:
-        - web
+        - web-browsers
 
-    - role: terminal-shell-configuration
+    - role: communication-tools
+      tags:
+        - communication-tools
 
-    - role: communication
-
-    - role: system_configuration
+    - role: system-coniguration
+      tags:
+        - system-coniguration-tools
