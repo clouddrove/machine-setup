@@ -26,3 +26,4 @@ slack_version: 4.4.2
 ssh_user: vaibhav
 ssh_keys_key_bits: 4096
 ssh_keys_key_type: "rsa"
+...
