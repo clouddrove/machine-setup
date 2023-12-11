@@ -29,6 +29,8 @@ The playbook automates the installation of the following tools:
 | Minikube           | Tool to run Kubernetes locally 🚜                            |
 | Lens               | Kubernetes IDE 🔍                                             |
 | SSH Keys           | Secure shell keys for authentication 🔑                       |
+| Oh My Zsh          | Interactive shell tool for managing Zsh configuration 🖥️     |
+
 
 ## Prerequisite Packages 📦
 
