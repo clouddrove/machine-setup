@@ -1,18 +1,18 @@
 ---
-#-----------------------------------------------------------------------#
-#------------------------Brave-Browsers---------------------------------#
+# -----------------------------------------------------------------------#
+# ------------------------Brave-Browsers---------------------------------#
 
 - name: Add Brave apt key
   become: true
   apt_key:
-    url: https://brave-browser-apt-release.s3.brave.com/brave-core.asc
+    url: "{{ brave_apt_url }}"
     state: present
-    keyring: /etc/apt/trusted.gpg.d/brave-browser-release.gpg
+    keyring: "{{ brave_apt_keyring }}"
 
 - name: Add Brave repo
   become: true
   apt_repository:
-    repo: deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main
+    repo: "{{ brave_repo_url }}"
     filename: brave-browser-release
 
 - name: Install Brave
@@ -20,10 +20,10 @@
   apt:
     name: brave-browser
     state: present
-    update_cache: yes
+    update_cache: true
 
-#-----------------------------------------------------------------------#
-#------------------------Chrome-Browser---------------------------------#
+# -----------------------------------------------------------------------#
+# ------------------------Chrome-Browser---------------------------------#
 
 - name: Install chrome
   become: true
@@ -31,22 +31,22 @@
     deb: "{{ chrome_url }}"
     state: present
 
-#-----------------------------------------------------------------------#
-#------------------------Tor-Browser---------------------------------#
+# -----------------------------------------------------------------------#
+# ------------------------Tor-Browser---------------------------------#
 
 - name: Add Tor repo
   become: true
   apt_repository:
-    repo: "deb https://deb.torproject.org/torproject.org/ {{ ansible_distribution_release }} main"
+    repo: "{{ tor_apt_repo }}"
     filename: tor
-    update_cache: no
+    update_cache: false
 
 - name: Add Tor keys
   become: true
   apt_key:
-    url: https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc
+    url: "{{ tor_apt_url }}"
     state: present
-    keyring: /etc/apt/trusted.gpg.d/torproject.gpg
+    keyring: "{{ tor_keyring }}"
 
 - name: Install Tor packages
   become: true
@@ -57,5 +57,5 @@
       - torsocks
       - deb.torproject.org-keyring
     state: present
-    update_cache: yes
+    update_cache: true
 ...
