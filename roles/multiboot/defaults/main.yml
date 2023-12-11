@@ -1,4 +1,0 @@
----
-prereq_pkgs: python3-pyqt5
-deb_file: python3-multibootusb_9.2.0-1_all.deb
-download_url: "https://github.com/mbusb/multibootusb/releases/download/v9.2.0/{{ deb_file }}"

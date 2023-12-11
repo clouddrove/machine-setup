@@ -1,0 +1,66 @@
+---
+ansible_python_interpreter: /usr/bin/python3
+ansible_user: ubuntu
+ansible_ssh_private_key_file: /home/vaibhav/Downloads/ubuntu-test-7.pem
+
+# Pre-requisits packages
+prereq_pkgs: [ca-certificates, apt-transport-https, lsb-release, gnupg, bash-completion, gnupg2, curl, software-properties-common, virtualenv, python3-setuptools, unzip, libxtst6, libx11-xcb1, libxcb-dri3-0, libasound2, libssl-dev, htop, openssh-server]
+
+# Git
+git_user: "vaibhav"
+git_email: "pendharevaibhav@gmail.com"
+
+# AWS CLI
+aws_cli_repo: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+
+# Kubectl APT Key
+kubectl_apt_key: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+kubectl_repo: deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main
+kubectl_keyring: /etc/apt/trusted.gpg.d/kubectl-apt-key.gpg
+
+# HELM
+helm_repo_url: deb [arch=amd64] https://baltocdn.com/helm/stable/debian/ all main
+helm_apt_key: https://helm.baltorepo.com/organization/signing.asc
+
+# tfswitch url
+tfswitch_url: curl -L https://raw.githubusercontent.com/warrensbox/terraform-switcher/release/install.sh | bash
+
+# Docker
+compose_version: 1.25.5
+docker_compose_url: https://github.com/docker/compose/releases/download/{{ compose_version }}/docker-compose-Linux-x86_64
+docker_repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+
+# Lens
+lens_repository: "deb [arch=amd64 signed-by=/usr/share/keyrings/lens-archive-keyring.gpg] https://downloads.k8slens.dev/apt/debian stable main"
+lens_apt_url: https://downloads.k8slens.dev/keys/gpg
+lens_keyring: /usr/share/keyrings/lens-archive-keyring.gpg
+docker_apt_url: https://download.docker.com/linux/ubuntu/gpg
+
+# Browsers to incldue [brave|chrome|tor]
+browsers:
+  - chrome
+  - brave
+  - tor
+chrome_url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+brave_repo_url: deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main
+brave_apt_url: https://brave-browser-apt-release.s3.brave.com/brave-core.asc
+tor_apt_url: https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc
+tor_apt_repo: "deb https://deb.torproject.org/torproject.org/ {{ ansible_distribution_release }} main"
+tor_keyring: /etc/apt/trusted.gpg.d/torproject.gpg
+brave_apt_keyring: /etc/apt/trusted.gpg.d/brave-browser-release.gpg
+
+# Communication-tools
+slack_version: 4.4.2
+slack_package: "wget -O /tmp/slack-desktop-{{ slack_version }}-amd64.deb https://downloads.slack-edge.com/linux_releases/slack-desktop-{{ slack_version }}-amd64.deb"
+zoom_apt_url: deb=https://zoom.us/client/latest/zoom_amd64.deb
+
+# system configuration (SSH KEY)
+ssh_user: vaibhav
+ssh_keys_key_bits: 4096
+ssh_keys_key_type: "rsa"
+
+# Oh My Zsh
+zsh_url: https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+zsh_script_dest: /var/tmp
+zsh_script_file: zsh_install.sh
+...

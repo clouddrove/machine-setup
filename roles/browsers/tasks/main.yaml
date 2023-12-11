@@ -1,5 +1,0 @@
----
-- include: prereqs.yaml
-
-- include: "{{ item }}.yaml"
-  loop: "{{ browsers }}"
