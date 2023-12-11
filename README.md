@@ -73,7 +73,7 @@ To utilize this playbook:
 3. Execute the playbook from the terminal with the following command:
 
     ```bash
-    ansible-playbook -i ./inventories/hosts.ini ./playbook/machine-setup.yml
+    ansible-playbook -i ./inventories/hosts.ini ./playbook/tools_setup.yml
     ```
 
 Enjoy the streamlined setup of your DevOps environment! 🚀
