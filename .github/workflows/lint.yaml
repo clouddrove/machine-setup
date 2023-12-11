@@ -1,0 +1,9 @@
+---
+name: YAML-LINTER
+on:
+  push:
+
+jobs:
+  YAML-LINTER:
+    uses: clouddrove/github-shared-workflows/.github/workflows/ymllint.yml@master
+...
