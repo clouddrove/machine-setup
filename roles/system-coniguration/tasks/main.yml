@@ -1,0 +1,37 @@
+---
+# ---------------------------------------------------------------------------#
+# ------------------------SSH-KEY--------------------------------------------#
+
+- name: Generate an SSH key pair for the "{{ ssh_user }} user"
+  become: true
+  ansible.builtin.openssh_keypair:
+    path: "/home/{{ ansible_user }}/.ssh/{{ ssh_user }}"
+    type: "{{ ssh_keys_key_type }}"
+    size: "{{ ssh_keys_key_bits }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: present
+    force: false
+
+# ---------------------------------------------------------------------------#
+# ------------------------Oh-My-ZSH--------------------------------------------#
+
+- name: Update apt cache if it's older than 3600 seconds
+  become: true
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install zsh
+  become: true
+  apt:
+    name: zsh
+    state: present
+    update_cache: yes
+
+- name: Set zsh as the default shell for the current user
+  become: true
+  user:
+    name: "{{ ansible_user_id }}"
+    shell: /bin/zsh
+...

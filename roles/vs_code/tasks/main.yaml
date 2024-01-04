@@ -1,5 +1,0 @@
----
-- include: install.yaml
-
-- include: extensions.yaml
-  when: install_extensions

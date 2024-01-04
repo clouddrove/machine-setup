@@ -1,0 +1,42 @@
+---
+# -------------------------------------------------------------------------#
+# ------------------------Slack--------------------------------------------#
+- name: apt-get update
+  become: true
+  apt: update_cache=true cache_valid_time=3600
+
+- name: install gdebi
+  become: true
+  apt: name=gdebi
+
+- name: Check if slack is installed
+  command: dpkg-query -W slack-desktop
+  register: check_slack
+  failed_when: false
+  changed_when: false
+
+- name: Download Ubuntu slack package
+  become: true
+  command: "{{ slack_package }}"
+  args:
+    creates: "/tmp/slack-desktop-{{ slack_version }}-amd64.deb"
+  when: check_slack.rc == 1
+
+# -------------------------------------------------------------------------#
+# ------------------------Zoom---------------------------------------------#
+
+- name: Install zoom
+  become: true
+  apt: "{{ zoom_apt_url }}"
+
+# --------------------------------------------------------------------------#
+# ------------------------Telegram------------------------------------------#
+
+- name: Add Telegram repository
+  become: true
+  apt_repository: repo='ppa:atareao/telegram'
+
+- name: Install Telegram
+  become: true
+  package: name=telegram
+...

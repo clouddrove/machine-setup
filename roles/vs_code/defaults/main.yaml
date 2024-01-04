@@ -1,6 +1,0 @@
----
-install_extensions: no
-code_extensions: [eamodio.gitlens, hashicorp.terraform, ivory-lab.jenkinsfile-support, ms-azuretools.vscode-docker, ms-kubernetes-tools.vscode-kubernetes-tools, ms-python.python, redhat.vscode-yaml]
-prereq_pkgs: [libxtst6, libx11-xcb1, libxcb-dri3-0, libasound2]
-running_on_molecule: no
-user_data_dir: ""

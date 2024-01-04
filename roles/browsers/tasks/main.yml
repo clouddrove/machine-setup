@@ -1,0 +1,61 @@
+---
+# -----------------------------------------------------------------------#
+# ------------------------Brave-Browsers---------------------------------#
+
+- name: Add Brave apt key
+  become: true
+  apt_key:
+    url: "{{ brave_apt_url }}"
+    state: present
+    keyring: "{{ brave_apt_keyring }}"
+
+- name: Add Brave repo
+  become: true
+  apt_repository:
+    repo: "{{ brave_repo_url }}"
+    filename: brave-browser-release
+
+- name: Install Brave
+  become: true
+  apt:
+    name: brave-browser
+    state: present
+    update_cache: true
+
+# -----------------------------------------------------------------------#
+# ------------------------Chrome-Browser---------------------------------#
+
+- name: Install chrome
+  become: true
+  apt:
+    deb: "{{ chrome_url }}"
+    state: present
+
+# -----------------------------------------------------------------------#
+# ------------------------Tor-Browser---------------------------------#
+
+- name: Add Tor repo
+  become: true
+  apt_repository:
+    repo: "{{ tor_apt_repo }}"
+    filename: tor
+    update_cache: false
+
+- name: Add Tor keys
+  become: true
+  apt_key:
+    url: "{{ tor_apt_url }}"
+    state: present
+    keyring: "{{ tor_keyring }}"
+
+- name: Install Tor packages
+  become: true
+  apt:
+    name:
+      - tor
+      - tor-geoipdb
+      - torsocks
+      - deb.torproject.org-keyring
+    state: present
+    update_cache: true
+...
