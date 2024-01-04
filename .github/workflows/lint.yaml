@@ -2,6 +2,8 @@
 name: YAML-LINTER
 on:
   push:
+  pull_request:
+    
 
 jobs:
   YAML-LINTER:

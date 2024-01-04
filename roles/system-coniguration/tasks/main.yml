@@ -16,22 +16,101 @@
 # ---------------------------------------------------------------------------#
 # ------------------------Oh-My-ZSH--------------------------------------------#
 
-- name: Update apt cache if it's older than 3600 seconds
+- name: Set ZSH as default shell
   become: true
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-
-- name: Install zsh
-  become: true
-  apt:
-    name: zsh
-    state: present
-    update_cache: yes
-
-- name: Set zsh as the default shell for the current user
-  become: true
-  user:
-    name: "{{ ansible_user_id }}"
+  ansible.builtin.user:
+    name: "{{ user.name }}"
     shell: /bin/zsh
+  ignore_errors: true
+  # TODO: Check if the user exists locally or it is defined in an LDAP database.
+
+- name: Define oh_my_zsh_installation_folder
+  ansible.builtin.set_fact:
+    oh_my_zsh_installation_folder: "{{ ansible_env.HOME }}/.oh-my-zsh"
+  when: user.oh_my_zsh_installation_folder is not defined
+
+- name: Print Oh-My-ZSH installation folder
+  ansible.builtin.debug:
+    msg: "{{ user.oh_my_zsh_installation_folder if user.oh_my_zsh_installation_folder is defined else oh_my_zsh_installation_folder }}"
+
+- name: Check if Oh-My-ZSH is installed
+  become_user: "{{ user.name }}"
+  ansible.builtin.stat:
+    path: "{{ user.oh_my_zsh_installation_folder if user.oh_my_zsh_installation_folder is defined else oh_my_zsh_installation_folder }}"
+  register: oh_my_zsh_installed
+
+- name: Install Oh-My-ZSH
+  become_user: "{{ user.name }}"
+  block:
+
+    - name: Create temporary file
+      ansible.builtin.tempfile:
+        state: file
+      register: oh_my_zsh_install_script
+
+    - name: Download Oh-My-ZSH
+      ansible.builtin.get_url:
+        url: https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+        dest: "{{ oh_my_zsh_install_script.path }}"
+        mode: "0700"
+
+    - name: Install Oh-My-ZSH
+      ansible.builtin.command: "{{ oh_my_zsh_install_script.path }} --unattended"
+
+    - name: Remove the temporary file
+      ansible.builtin.file:
+        path: "{{ oh_my_zsh_install_script.path }}"
+        state: absent
+      when: oh_my_zsh_install_script.path is defined
+
+  when: not oh_my_zsh_installed.stat.exists
+
+- name: Remove write permission from groups and others
+  become_user: "{{ user.name }}"
+  ansible.builtin.file:
+    path: "{{ user.oh_my_zsh_installation_folder if user.oh_my_zsh_installation_folder is defined else oh_my_zsh_installation_folder }}"
+    owner: "{{ user.name }}"
+    mode: "go-w"
+    recurse: true
+
+- name: Define oh_my_zsh_custom_folder
+  ansible.builtin.set_fact:
+    oh_my_zsh_custom_folder: "{{ user.oh_my_zsh_installation_folder if user.oh_my_zsh_installation_folder is defined else oh_my_zsh_installation_folder }}/custom"
+  when: user.oh_my_zsh_custom_folder is not defined
+
+- name: Print Oh-My-ZSH custom folder
+  ansible.builtin.debug:
+    msg: "{{ user.oh_my_zsh_custom_folder if user.oh_my_zsh_custom_folder is defined else oh_my_zsh_custom_folder }}"
+
+- name: Write .zshrc
+  become_user: "{{ user.name }}"
+  ansible.builtin.template:
+    src: .zshrc.j2
+    dest: "{{ ansible_env.HOME }}/.zshrc"
+    mode: "u=rw,go=r"
+
+- name: Copy aliases
+  become_user: "{{ user.name }}"
+  ansible.builtin.copy:
+    src: files/zsh/aliases
+    dest: "{{ user.oh_my_zsh_custom_folder | default(oh_my_zsh_custom_folder) }}"
+    mode: u=rw,g=r,o=r
+
+- name: Clone zsh-autosuggestions
+  become_user: "{{ user.name }}"
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "{{ user.oh_my_zsh_custom_folder | default(oh_my_zsh_custom_folder) }}/plugins/zsh-autosuggestions"
+    version: master
+    force: true
+  when: user.oh_my_zsh_install_zsh_autosuggestions | default(oh_my_zsh_install_zsh_autosuggestions)
+
+- name: Clone zsh-syntax-highlighting
+  become_user: "{{ user.name }}"
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+    dest: "{{ user.oh_my_zsh_custom_folder | default(oh_my_zsh_custom_folder) }}/plugins/zsh-syntax-highlighting"
+    version: master
+    force: true
+  when: user.oh_my_zsh_install_zsh_syntax_highlighting | default(oh_my_zsh_install_zsh_syntax_highlighting)
 ...

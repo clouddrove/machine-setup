@@ -1,0 +1,96 @@
+{{ ansible_managed | comment }}
+
+# If you come from bash you might have to change your $PATH.
+export PATH="{{ user.oh_my_zsh_path | default(oh_my_zsh_path) }}"
+
+# Path to your oh_my_zsh installation.
+export ZSH={{ user.oh_my_zsh_installation_folder | default(oh_my_zsh_installation_folder) }}
+
+# Set name of the theme to load --- if set to "random", it will
+# load a random theme each time oh-my-zsh is loaded, in which case,
+# to know which specific one was loaded, run: echo $RANDOM_THEME
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME="{{ user.oh_my_zsh_theme | default(oh_my_zsh_theme) }}"
+
+# Set list of themes to pick from when loading at random.
+# Setting this variable when ZSH_THEME=random will cause zsh to load
+# a theme from this variable instead of looking in $ZSH/themes/
+# If set to an empty array, this variable will have no effect.
+ZSH_THEME_RANDOM_CANDIDATES=( {{ user.oh_my_zsh_theme_random_candidates | default(oh_my_zsh_theme_random_candidates) | map("to_json") | join(" ") }} )
+
+# Set case-sensitive completion.
+CASE_SENSITIVE="{{ user.oh_my_zsh_case_sensitive | default(oh_my_zsh_case_sensitive) }}"
+
+# Set hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+HYPHEN_INSENSITIVE="{{ user.oh_my_zsh_hyphen_insensitive | default(oh_my_zsh_hyphen_insensitive) }}"
+
+# Set auto-update behavior.
+zstyle ':omz:update' mode {{ user.oh_my_zsh_auto_update_behavior | default(oh_my_zsh_auto_update_behavior) }}
+
+# Set how often to auto-update (in days).
+zstyle ':omz:update' frequency {{ user.oh_my_zsh_auto_update_days | default(oh_my_zsh_auto_update_days) }}
+
+# Set to true if pasting URLs and other text is messed up.
+DISABLE_MAGIC_FUNCTIONS="{{ user.oh_my_zsh_disable_magic_functions | default(oh_my_zsh_disable_magic_functions) }}"
+
+# Disable colors in ls.
+DISABLE_LS_COLORS="{{ user.oh_my_zsh_disable_ls_colors | default(oh_my_zsh_disable_ls_colors) }}"
+
+# Disable auto-setting terminal title.
+DISABLE_AUTO_TITLE="{{ user.oh_my_zsh_disable_auto_title | default(oh_my_zsh_disable_auto_title) }}"
+
+# Enable auto-correction.
+ENABLE_CORRECTION="{{ user.oh_my_zsh_enable_correction | default(oh_my_zsh_enable_correction) }}"
+
+# Enable display red dots whilst waiting for completion.
+COMPLETION_WAITING_DOTS="{{ user.oh_my_zsh_completion_waiting_dots | default(oh_my_zsh_completion_waiting_dots) }}"
+
+# Disable marking untracked files under VCS as dirty.
+# This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="{{ user.oh_my_zsh_disable_untracked_files_dirty | default(oh_my_zsh_disable_untracked_files_dirty) }}"
+
+# Change the command execution time stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+HIST_STAMPS="{{ user.oh_my_zsh_hist_stamps | default(oh_my_zsh_hist_stamps) }}"
+
+# Define ZSH custom folder
+ZSH_CUSTOM={{ user.oh_my_zsh_custom_folder | default(oh_my_zsh_custom_folder) }}
+
+# Set which plugins you'd like to load.
+# Standard plugins can be found in $ZSH/plugins/*
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(
+    {{ user.oh_my_zsh_plugins | default(oh_my_zsh_plugins) | join("\n    ") }}
+    {{ user.oh_my_zsh_plugins_append | default(oh_my_zsh_plugins_append) | join("\n    ") }}
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+
+# export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='mvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# Set personal aliases, overriding those provided by oh_my_zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh_my_zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
