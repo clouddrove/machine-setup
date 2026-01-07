@@ -81,6 +81,7 @@
   ansible.builtin.apt:
     deb: "{{ temp_dir }}/{{ zoom_package }}"
     state: present
+  when: ansible_architecture != 'aarch64'
   tags: ['zoom', 'communication-tools', 'install']
 
 # --------------------------------------------------------------------------#
@@ -90,14 +91,33 @@
   become: yes
   ansible.builtin.apt_repository:
     repo: 'ppa:atareao/telegram'
+  register: telegram_repo_result
+  failed_when: false
   tags: ['telegram', 'communication-tools', 'repository']
+
+- name: Update apt cache after adding Telegram repo
+  become: yes
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when: telegram_repo_result is succeeded
+  tags: ['telegram', 'communication-tools']
 
 - name: Install Telegram
   become: yes
   ansible.builtin.package:
     name: telegram
     state: present
+  when: telegram_repo_result is succeeded
+  register: telegram_install_result
+  failed_when: false
   tags: ['telegram', 'communication-tools', 'install']
+
+- name: Skip Telegram if installation failed
+  ansible.builtin.debug:
+    msg: "⚠️  Telegram installation skipped (PPA may not be available for this Ubuntu version)"
+  when: telegram_repo_result is failed or telegram_install_result is failed
+  tags: ['telegram', 'communication-tools']
 
 # --------------------------------------------------------------------------#
 # ------------------------Discord------------------------------------------#
@@ -109,15 +129,32 @@
   changed_when: false
   tags: ['discord', 'communication-tools']
 
-- name: Install Discord via snap
+- name: Download Discord .deb package
   become: yes
-  ansible.builtin.snap:
-    name: discord
+  ansible.builtin.shell: |
+    curl -L -o {{ temp_dir }}/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
+  args:
+    creates: "{{ temp_dir }}/discord.deb"
+  when: discord_check.rc != 0 and ansible_architecture != 'aarch64'
+  register: discord_download_result
+  retries: 3
+  delay: 5
+  tags: ['discord', 'communication-tools', 'download']
+
+- name: Install Discord
+  become: yes
+  ansible.builtin.apt:
+    deb: "{{ temp_dir }}/discord.deb"
     state: present
-    channel: "{{ discord_snap_channel }}"
-  when: discord_check.rc != 0
+  when: discord_download_result is succeeded and ansible_architecture != 'aarch64'
   register: discord_install_result
   tags: ['discord', 'communication-tools', 'install']
+
+- name: Skip Discord on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Discord is not available for ARM64 architecture. Skipping installation."
+  when: ansible_architecture == 'aarch64'
+  tags: ['discord', 'communication-tools']
 
 - name: Verify Discord installation
   become: yes
@@ -144,19 +181,22 @@
   changed_when: false
   tags: ['teams', 'communication-tools']
 
-- name: Set Teams download URL based on architecture
+- name: Set Teams architecture
   ansible.builtin.set_fact:
     teams_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+  tags: ['teams']
+
+- name: Set Teams download URL
+  ansible.builtin.set_fact:
     teams_download_url: "https://teams.microsoft.com/downloads/desktopurl?env=production&plat=linux&arch={{ teams_arch }}&download=true&linuxArchiveType=deb"
   tags: ['teams']
 
 - name: Download Microsoft Teams package
   become: yes
-  ansible.builtin.get_url:
-    url: "{{ teams_download_url }}"
-    dest: "{{ temp_dir }}/teams-{{ teams_arch }}.deb"
-    timeout: 60
-    follow_redirects: all
+  ansible.builtin.shell: |
+    curl -L -o {{ temp_dir }}/teams-{{ teams_arch }}.deb "{{ teams_download_url }}"
+  args:
+    creates: "{{ temp_dir }}/teams-{{ teams_arch }}.deb"
   when: teams_check.rc != 0
   register: teams_download_result
   retries: 3

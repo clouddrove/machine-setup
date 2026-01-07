@@ -2,6 +2,11 @@
 # ---------------------------------------------------------------------------#
 # ------------------------SSH-KEY--------------------------------------------#
 
+- name: Set ansible_user for SSH key generation
+  ansible.builtin.set_fact:
+    ansible_user: "{{ ansible_user_id }}"
+  tags: ['ssh', 'system-configuration']
+
 - name: Generate an SSH key pair for the "{{ ssh_user }} user"
   become: yes
   community.crypto.openssh_keypair:
