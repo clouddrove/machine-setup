@@ -3,40 +3,67 @@
 # ------------------------Slack--------------------------------------------#
 - name: apt-get update
   become: true
-  apt: update_cache=true cache_valid_time=3600
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
 
 - name: install gdebi
   become: true
-  apt: name=gdebi
+  ansible.builtin.apt:
+    name: gdebi
+    state: present
 
 - name: Check if slack is installed
-  command: dpkg-query -W slack-desktop
+  ansible.builtin.command: dpkg-query -W slack-desktop
   register: check_slack
   failed_when: false
   changed_when: false
 
 - name: Download Ubuntu slack package
   become: true
-  command: "{{ slack_package }}"
+  ansible.builtin.command: "{{ slack_package }}"
   args:
-    creates: "/tmp/slack-desktop-{{ slack_version }}-amd64.deb"
+    creates: "{{ temp_dir }}/slack-desktop-{{ slack_version }}-amd64.deb"
+  when: check_slack.rc == 1
+  retries: 3
+  delay: 5
+
+- name: Install Slack
+  become: true
+  ansible.builtin.apt:
+    deb: "{{ temp_dir }}/slack-desktop-{{ slack_version }}-amd64.deb"
+    state: present
   when: check_slack.rc == 1
 
 # -------------------------------------------------------------------------#
 # ------------------------Zoom---------------------------------------------#
 
+- name: Download Zoom package
+  become: true
+  ansible.builtin.get_url:
+    url: "https://zoom.us/client/latest/zoom_amd64.deb"
+    dest: "{{ temp_dir }}/zoom_amd64.deb"
+    timeout: 30
+  retries: 3
+  delay: 5
+
 - name: Install zoom
   become: true
-  apt: "{{ zoom_apt_url }}"
+  ansible.builtin.apt:
+    deb: "{{ temp_dir }}/zoom_amd64.deb"
+    state: present
 
 # --------------------------------------------------------------------------#
 # ------------------------Telegram------------------------------------------#
 
 - name: Add Telegram repository
   become: true
-  apt_repository: repo='ppa:atareao/telegram'
+  ansible.builtin.apt_repository:
+    repo: 'ppa:atareao/telegram'
 
 - name: Install Telegram
   become: true
-  package: name=telegram
+  ansible.builtin.package:
+    name: telegram
+    state: present
 ...

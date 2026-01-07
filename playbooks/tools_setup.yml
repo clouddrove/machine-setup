@@ -1,21 +1,82 @@
 ---
+# ============================================================================
+# DevOps Machine Setup Playbook
+# ============================================================================
+# This playbook automatically installs all DevOps tools on your Ubuntu machine
+# Just run it and answer 2 simple questions!
+# Hostname is automatically generated as CD-IN-UB-{random_number}
+# ============================================================================
+
 - hosts: all
-  vars_files:
-    -./ubuntu-setup/inventories/vars.yml
+  vars_prompt:
+    - name: git_user
+      prompt: |
+        📝 What's your Git username?
+        (This will be used for git config - e.g., "john.doe" or "johndoe")
+      private: false
+    - name: git_email
+      prompt: |
+        📧 What's your Git email?
+        (This will be used for git config - e.g., "john.doe@company.com")
+      private: false
+
+  vars:
+    # Generate a random 5-digit number for hostname (10000-99999)
+    hostname_base: "{{ range(10000, 100000) | random }}"
+    
+    # Hostname will be set as: CD-IN-UB-{random_number}
+    hostname: "CD-IN-UB-{{ hostname_base }}"
+
+    # Temporary directory for downloads
+    temp_dir: /tmp
+
+    # SSH key will use your Git username
+    ssh_user: "{{ git_user }}"
+
+  pre_tasks:
+    # Display the generated hostname
+    - name: Display generated hostname
+      ansible.builtin.debug:
+        msg: "🖥️  Hostname will be set to: {{ hostname }}"
+    
+    # Set the hostname to CD-IN-UB-{random_number}
+    - name: Set hostname
+      become: true
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"
+      when: hostname is defined
+
+    # Update /etc/hosts file with the new hostname
+    - name: Update /etc/hosts with new hostname
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1.*'
+        line: "127.0.1.1 {{ hostname }}"
+        state: present
+      when: hostname is defined
+
+  # ============================================================================
+  # Roles - Each role installs a group of related tools
+  # ============================================================================
   roles:
+    # DevOps tools: Git, Docker, AWS CLI, Kubectl, Helm, Terraform, Lens
     - role: devops
       tags:
         - devops-tools
 
+    # Web browsers: Chrome, Brave, Tor
     - role: browsers
       tags:
         - web-browsers
 
+    # Communication tools: Slack, Zoom, Telegram
     - role: communication-tools
       tags:
         - communication-tools
 
-    - role: system-coniguration
+    # System configuration: SSH Keys, Oh My Zsh
+    - role: system-configuration
       tags:
-        - system-coniguration-tools
+        - system-configuration-tools
 ...

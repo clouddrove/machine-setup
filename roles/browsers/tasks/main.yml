@@ -4,53 +4,59 @@
 
 - name: Add Brave apt key
   become: true
-  apt_key:
+  ansible.builtin.apt_key:
     url: "{{ brave_apt_url }}"
     state: present
     keyring: "{{ brave_apt_keyring }}"
+  when: "'brave' in browsers"
 
 - name: Add Brave repo
   become: true
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ brave_repo_url }}"
     filename: brave-browser-release
+  when: "'brave' in browsers"
 
 - name: Install Brave
   become: true
-  apt:
+  ansible.builtin.apt:
     name: brave-browser
     state: present
     update_cache: true
+  when: "'brave' in browsers"
 
 # -----------------------------------------------------------------------#
 # ------------------------Chrome-Browser---------------------------------#
 
 - name: Install chrome
   become: true
-  apt:
+  ansible.builtin.apt:
     deb: "{{ chrome_url }}"
     state: present
+  when: "'chrome' in browsers"
 
 # -----------------------------------------------------------------------#
 # ------------------------Tor-Browser---------------------------------#
 
 - name: Add Tor repo
   become: true
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ tor_apt_repo }}"
     filename: tor
     update_cache: false
+  when: "'tor' in browsers"
 
 - name: Add Tor keys
   become: true
-  apt_key:
+  ansible.builtin.apt_key:
     url: "{{ tor_apt_url }}"
     state: present
     keyring: "{{ tor_keyring }}"
+  when: "'tor' in browsers"
 
 - name: Install Tor packages
   become: true
-  apt:
+  ansible.builtin.apt:
     name:
       - tor
       - tor-geoipdb
@@ -58,4 +64,5 @@
       - deb.torproject.org-keyring
     state: present
     update_cache: true
+  when: "'tor' in browsers"
 ...

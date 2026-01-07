@@ -11,27 +11,53 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     state: present
-    force: false
+    force: "{{ ssh_keys_force | default(false) }}"
 
 # ---------------------------------------------------------------------------#
 # ------------------------Oh-My-ZSH--------------------------------------------#
 
 - name: Update apt cache if it's older than 3600 seconds
   become: true
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
 
 - name: Install zsh
   become: true
-  apt:
+  ansible.builtin.apt:
     name: zsh
     state: present
     update_cache: yes
 
+- name: Check if Oh My Zsh is already installed
+  become: false
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.oh-my-zsh"
+  register: ohmyzsh_check
+  failed_when: false
+
+- name: Download Oh My Zsh installation script
+  become: false
+  ansible.builtin.get_url:
+    url: "{{ zsh_url }}"
+    dest: "{{ temp_dir }}/{{ zsh_script_file }}"
+    mode: '0755'
+  when: not ohmyzsh_check.stat.exists
+  retries: 3
+  delay: 5
+
+- name: Install Oh My Zsh
+  become: false
+  ansible.builtin.shell: "{{ temp_dir }}/{{ zsh_script_file }} --unattended"
+  args:
+    creates: "{{ ansible_env.HOME }}/.oh-my-zsh"
+  when: not ohmyzsh_check.stat.exists
+  retries: 2
+  delay: 5
+
 - name: Set zsh as the default shell for the current user
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ ansible_user_id }}"
     shell: /bin/zsh
 ...

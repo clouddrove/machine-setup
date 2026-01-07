@@ -1,0 +1,8 @@
+---
+# Slack
+slack_version: 4.4.2
+slack_package: "wget -O {{ temp_dir }}/slack-desktop-{{ slack_version }}-amd64.deb https://downloads.slack-edge.com/linux_releases/slack-desktop-{{ slack_version }}-amd64.deb"
+
+# Zoom
+zoom_apt_url: deb=https://zoom.us/client/latest/zoom_amd64.deb
+

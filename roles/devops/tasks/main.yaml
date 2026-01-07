@@ -4,7 +4,8 @@
 
 - name: fix broken Packages.
   become: true
-  shell: apt --fix-broken install  -y
+  ansible.builtin.shell: apt --fix-broken install -y
+  ignore_errors: yes
 
 - name: Update the server
   become: true
@@ -33,7 +34,7 @@
 - name: Delete the old AWS CLI V2 temp files
   become: false
   ansible.builtin.file:
-    path: '/tmp/aws'
+    path: "{{ temp_dir }}/aws"
     state: 'absent'
   tags: ['cleanup', 'awscli']
 
@@ -41,20 +42,24 @@
   become: false
   ansible.builtin.unarchive:
     src: "{{ aws_cli_repo }}"
-    dest: '/tmp'
+    dest: "{{ temp_dir }}"
     remote_src: true
   tags: ['download', 'awscli']
+  retries: 3
+  delay: 5
 
 - name: Run the AWS CLI V2 installer
   become: true
-  shell: "/tmp/aws/install --update"
+  ansible.builtin.shell: "{{ temp_dir }}/aws/install --update"
   tags: ['install', 'awscli']
   register: download_result
   until: download_result is succeeded
+  retries: 3
+  delay: 10
 
 - name: Verify AWS CLI installation and print version
   become: true
-  command: aws --version
+  ansible.builtin.command: aws --version
   register: aws_version
   changed_when: false
   when: download_result is succeeded
@@ -71,7 +76,7 @@
 
 - name: Install Pre-requisite Packages
   become: true
-  apt:
+  ansible.builtin.apt:
     name: "{{ prereq_pkgs }}"
     state: present
 
@@ -99,11 +104,13 @@
     cache_valid_time: 3600
   register: download_result
   until: download_result is succeeded
+  retries: 3
+  delay: 10
   tags: ['kubectl', 'install']
 
 - name: Verify Kubectl installation and print version
   become: true
-  command: kubectl version --client
+  ansible.builtin.command: kubectl version --client
   register: kubectl_version_output
   changed_when: false
   when: download_result is succeeded
@@ -143,6 +150,8 @@
         cache_valid_time: 3600
       register: download_result
       until: download_result is succeeded
+      retries: 3
+      delay: 10
       tags: ['helm', 'install']
 
     - name: Check if bash_completion.d directory exists
@@ -161,14 +170,14 @@
 
     - name: Enable Helm auto-completion
       become: true
-      shell: helm completion bash > /etc/bash_completion.d/helm
+      ansible.builtin.shell: helm completion bash > /etc/bash_completion.d/helm
       args:
         creates: /etc/bash_completion.d/helm
       tags: ['helm', 'completion']
 
 - name: Verify Helm installation
   become: true
-  command: helm version --short
+  ansible.builtin.command: helm version --short
   register: helm_version
   changed_when: false
   when: download_result is succeeded
@@ -185,30 +194,30 @@
 
 - name: Update apt
   become: true
-  apt:
+  ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
 
 - name: Add Docker GPG Key
   become: true
-  apt_key:
+  ansible.builtin.apt_key:
     url: "{{ docker_apt_url }}"
     state: present
 
 - name: Add Docker Repository
   become: true
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ docker_repo }}"
 
 - name: Update apt
   become: true
-  apt:
+  ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
 
 - name: Install Docker
   become: true
-  apt:
+  ansible.builtin.apt:
     name:
       - docker-ce
       - docker-ce-cli
@@ -216,10 +225,12 @@
     state: present
   register: download_result
   until: download_result is succeeded
+  retries: 3
+  delay: 10
 
 - name: Verify Docker installation and print version
   become: true
-  command: docker --version
+  ansible.builtin.command: docker --version
   register: docker_version
   changed_when: false
   when: download_result is succeeded
@@ -235,7 +246,7 @@
 
 - name: Download and install docker-compose
   become: true
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ docker_compose_url }}"
     dest: /usr/local/bin/docker-compose
     mode: 'u+x,g+x'
@@ -246,20 +257,21 @@
   delay: 10
 
 - name: Ensure Docker group exists
-  group:
+  become: true
+  ansible.builtin.group:
     name: docker
     state: present
 
 - name: Add User to Docker Group
   become: true
-  user:
+  ansible.builtin.user:
     append: true
     groups: docker
     name: "{{ ansible_user_id }}"
 
 - name: Verify Docker-compose installation and print version
   become: true
-  command: docker-compose version --short
+  ansible.builtin.command: docker-compose version --short
   register: docker_compose_version
   changed_when: false
   when: download_result is succeeded
@@ -298,7 +310,7 @@
 
 - name: Verify Git installation and print version
   become: true
-  command: git --version
+  ansible.builtin.command: git --version
   register: git_version
   changed_when: false
   when: download_result is succeeded
@@ -343,6 +355,8 @@
     state: present
   register: download_result
   until: download_result is succeeded
+  retries: 3
+  delay: 10
 
 - name: Print message after Lens installation
   ansible.builtin.debug:
@@ -352,22 +366,32 @@
 # -------------------------------------------------------#
 # ------------------------TF_SWITCH-------------------------#
 
+- name: Check if tfswitch is already installed
+  become: false
+  ansible.builtin.command: which tfswitch
+  register: tfswitch_check
+  failed_when: false
+  changed_when: false
+
 - name: Download and execute the tf-switcher installation script
   become: true
-  shell: "{{ tfswitch_url }}"
+  ansible.builtin.shell: "{{ tfswitch_url }}"
   register: download_result
+  when: tfswitch_check.rc != 0
+  retries: 3
+  delay: 5
 
 - name: Verify tfswitch installation and print version
   become: true
-  command: tfswitch --version
+  ansible.builtin.command: tfswitch --version
   register: tfswitch_version
   changed_when: false
-  when: download_result is succeeded
+  when: download_result is succeeded or tfswitch_check.rc == 0
 
 - name: Print message after tfswitch installation
   ansible.builtin.debug:
     msg: |
      "tfswitch has been successfully installed and
        {{ tfswitch_version.stdout }}"
-  when: download_result is succeeded
+  when: tfswitch_version is defined
 ...

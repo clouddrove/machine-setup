@@ -19,14 +19,12 @@ The playbook automates the installation of the following tools:
 | Terraform          | Infrastructure as code software tool 🏗️                      |
 | Kubectl            | Command-line tool for Kubernetes ⚙️                           |
 | Helm               | Package manager for Kubernetes 📦                             |
-| VS Code            | Source-code editor 💻                                        |
 | Chrome             | Web browser 🌐                                               |
 | Brave              | Privacy-focused web browser 🛡️                               |
 | Tor                | Browser for anonymous web browsing 🕵️‍♂️                     |
 | Telegram           | Messaging app 📱                                             |
 | Zoom               | Video conferencing tool 📹                                   |
 | Slack              | Collaboration hub for work 💬                                |
-| Minikube           | Tool to run Kubernetes locally 🚜                            |
 | Lens               | Kubernetes IDE 🔍                                             |
 | SSH Keys           | Secure shell keys for authentication 🔑                       |
 | Oh My Zsh          | Interactive shell tool for managing Zsh configuration 🖥️     |
@@ -59,22 +57,76 @@ In addition to the tools, the playbook installs the following prerequisite packa
 
 ## Getting Started 🌟
 
-To utilize this playbook:
+### For Beginners (Easiest Way)
 
-1. Clone this repository to your local machine.
-2. Navigate to `inventories/vars.yml` and update the variables to match your configuration:
+**Just run one command:**
+```bash
+./setup.sh
+```
 
-    ```yaml
-    git_user: "your_username"
-    git_email: "your_email@example.com"
-    ssh_user: "your_username"
-    ```
+That's it! The script will handle everything.
 
-3. Execute the playbook from the terminal with the following command:
+### Manual Setup (If you prefer)
 
-    ```bash
-    ansible-playbook -i ./inventories/hosts.ini ./playbook/tools_setup.yml
-    ```
+1. **Install Ansible** (if not already installed):
+   ```bash
+   sudo apt update
+   sudo apt install -y ansible
+   ```
+
+2. **Run the playbook**:
+   ```bash
+   ansible-playbook -i ./inventories/hosts.ini ./playbooks/tools_setup.yml
+   ```
+
+3. **Answer 2 simple questions**:
+   - Your Git username (e.g., `john.doe`)
+   - Your Git email (e.g., `john.doe@company.com`)
+
+**Note**: Hostname is automatically generated as `CD-IN-UB-{random_number}` (e.g., `CD-IN-UB-45678`)
+
+### 📖 New to Ansible?
+
+Check out our **[QUICKSTART.md](QUICKSTART.md)** guide for step-by-step instructions!
+
+## What Gets Installed? 🧰
+
+The playbook automatically installs all these tools:
+
+**DevOps Tools:**
+- Git (configured with your details)
+- Docker & Docker Compose
+- AWS CLI v2
+- Kubectl & Helm
+- Terraform (via tfswitch)
+- Lens (Kubernetes IDE)
+
+**Browsers:**
+- Google Chrome
+- Brave Browser
+- Tor Browser
+
+**Communication:**
+- Slack
+- Zoom
+- Telegram
+
+**System:**
+- SSH Keys
+- Oh My Zsh (with plugins)
+
+## ⏱️ Installation Time
+
+- **Fast internet**: ~15 minutes
+- **Slow internet**: ~30 minutes
+
+The playbook will show progress for each tool being installed.
+
+## 🆘 Need Help?
+
+- 📖 Read [QUICKSTART.md](QUICKSTART.md) for detailed guide
+- 🔍 Check playbook output for specific errors
+- 💬 Ask your mentor or team lead
 
 Enjoy the streamlined setup of your DevOps environment! 🚀
 
