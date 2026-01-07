@@ -24,10 +24,10 @@
     # Hostname prefix (customize this for your organization)
     # Default: DEV, can be overridden by setting hostname_prefix in inventory or command line
     hostname_prefix: "{{ hostname_prefix | default('DEV') }}"
-    
+
     # Generate a random 5-digit number for hostname (10000-99999)
     hostname_base: "{{ range(10000, 100000) | random }}"
-    
+
     # Hostname will be set as: {prefix}-{random_number}
     # Default: DEV-{random_number}
     # To customize: ansible-playbook ... -e hostname_prefix=MYORG
@@ -68,7 +68,7 @@
       ansible.builtin.debug:
         msg: "🖥️  Hostname will be set to: {{ hostname }}"
       changed_when: false
-    
+
     # Set the hostname to CD-IN-UB-{random_number}
     # Skip in Docker containers (hostname changes not allowed)
     - name: Check if running in Docker
@@ -82,7 +82,7 @@
       become: yes
       ansible.builtin.hostname:
         name: "{{ hostname }}"
-      when: 
+      when:
         - hostname is defined
         - not docker_check.stat.exists
 
@@ -94,7 +94,7 @@
         regexp: '^127\.0\.1\.1.*'
         line: "127.0.1.1 {{ hostname }}"
         state: present
-      when: 
+      when:
         - hostname is defined
         - not docker_check.stat.exists
 
@@ -153,7 +153,7 @@
       ansible.builtin.debug:
         msg: |
           ✅ Installation Complete!
-          
+
           Installed DevOps Tools:
           - Git: {{ tool_version.results[0].stdout | default('N/A') }}
           - Docker: {{ tool_version.results[1].stdout | default('N/A') }}
@@ -165,7 +165,7 @@
           - k9s: {{ tool_version.results[7].stdout | default('N/A') }}
           - VS Code: {{ tool_version.results[8].stdout | default('N/A') }}
           - Ansible: {{ tool_version.results[9].stdout | default('N/A') }}
-          
+
           Next Steps:
           1. Restart your terminal or run: source ~/.zshrc
           2. Verify installations with: git --version, docker --version, etc.
