@@ -1,80 +1,289 @@
-# DevOps Tools Setup 🛠️
+# DevOps Machine Setup 🚀
 
-Prepared by Clouddrove, this Ansible role is meticulously designed to facilitate the seamless setup of your machine with a suite of essential DevOps tools. 🚀
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ansible Lint](https://img.shields.io/badge/ansible--lint-passing-brightgreen)](https://github.com/ansible/ansible-lint)
 
-The playbook is primed for execution on the local host, ensuring a swift and hassle-free environment setup. 💻
+An open-source Ansible playbook that automates the installation and configuration of essential DevOps tools on Ubuntu systems. Set up your development environment in minutes with a single command!
 
-Currently, it is optimized for Ubuntu-based Linux distributions. 🐧
+> **Originally developed by [Clouddrove](https://clouddrove.com), now open-source and community-driven.**
 
-## Included Tools 🧰
+## ✨ Features
 
-The playbook automates the installation of the following tools:
+- 🎯 **One-Command Setup**: Install 20+ DevOps tools with `make setup`
+- 🧩 **Modular Design**: Well-organized Ansible roles for easy customization
+- 🔒 **Secure**: GPG key verification for all packages
+- 📚 **Well Documented**: Comprehensive guides for beginners and experts
+- 🧪 **Tested**: Linted, tested, and production-ready
+- 🎓 **Beginner Friendly**: Clear documentation and helpful error messages
 
-| DevOps Tools       | Description                                                  |
-|--------------------|--------------------------------------------------------------|
-| Git                | Version control system 📝                                    |
-| Docker             | Container platform 🐳                                        |
-| Docker-compose     | Tool for defining and running multi-container Docker apps 📦 |
-| AWS CLI            | Command-line interface for Amazon Web Services ☁️            |
-| Terraform          | Infrastructure as code software tool 🏗️                      |
-| Kubectl            | Command-line tool for Kubernetes ⚙️                           |
-| Helm               | Package manager for Kubernetes 📦                             |
-| VS Code            | Source-code editor 💻                                        |
-| Chrome             | Web browser 🌐                                               |
-| Brave              | Privacy-focused web browser 🛡️                               |
-| Tor                | Browser for anonymous web browsing 🕵️‍♂️                     |
-| Telegram           | Messaging app 📱                                             |
-| Zoom               | Video conferencing tool 📹                                   |
-| Slack              | Collaboration hub for work 💬                                |
-| Minikube           | Tool to run Kubernetes locally 🚜                            |
-| Lens               | Kubernetes IDE 🔍                                             |
-| SSH Keys           | Secure shell keys for authentication 🔑                       |
-| Oh My Zsh          | Interactive shell tool for managing Zsh configuration 🖥️     |
+## 🛠️ What Gets Installed?
 
+### DevOps Tools
+- **Git** - Version control (configured with your details)
+- **Docker & Docker Compose** - Container platform
+- **AWS CLI v2** - Amazon Web Services CLI
+- **Azure CLI** - Microsoft Azure cloud management
+- **GCP CLI (gcloud)** - Google Cloud Platform CLI
+- **Kubectl** - Kubernetes command-line tool
+- **Helm** - Kubernetes package manager
+- **k9s** - Kubernetes terminal UI
+- **Terraform** - Infrastructure as code (via tfswitch)
+- **Ansible** - Automation and configuration management
+- **Visual Studio Code** - Industry-standard code editor
+- **Lens** - Kubernetes IDE
 
-## Prerequisite Packages 📦
+### Web Browsers
+- **Google Chrome** - Web browser
+- **Brave Browser** - Privacy-focused browser
+- **Tor Browser** - Anonymous browsing
 
-In addition to the tools, the playbook installs the following prerequisite packages:
+### Communication Tools
+- **Slack** - Team collaboration
+- **Zoom** - Video conferencing
+- **Telegram** - Messaging app
+- **Discord** - Developer communities
+- **Microsoft Teams** - Enterprise communication
 
-| Prerequisite Packages         | Purpose                                          |
-|-------------------------------|--------------------------------------------------|
-| ca-certificates               | Common CA certificates 🔒                        |
-| apt-transport-https            | Transport for APT over HTTPS 🔐                  |
-| lsb-release                   | Provides information about the Linux distribution📦|
-| gnupg                         | GNU Privacy Guard for encryption 🔐              |
-| bash-completion               | Programmable completion for Bash 🖥️              |
-| gnupg2                        | GNU Privacy Guard version 2 🔐                   |
-| curl                          | Tool for transferring data with URLs 🌐          |
-| software-properties-common    | Manage the repositories that you install software from 🛠️ |
-| virtualenv                    | Tool to create isolated Python environments 🐍   |
-| python3-setuptools            | Easily build and distribute Python packages 📦   |
-| unzip                         | Unpacks ZIP files 📂                             |
-| libxtst6                      | Library for the X11 Testing -- Resource extension🖥️|
-| libx11-xcb1                   | X11 client-side library 🖥️                       |
-| libxcb-dri3-0                 | X11 Direct Rendering Infrastructure 🖥️          |
-| libasound2                    | Shared library for ALSA applications 🔊          |
-| libssl-dev                    | Development files for SSL libraries 🔐           |
-| htop                          | Interactive process viewer 📊                     |
-| openssh-server                | Secure shell server for secure access from remote machines 🔐 |
+### System Configuration
+- **SSH Keys** - Secure shell authentication
+- **Oh My Zsh** - Enhanced Zsh shell with plugins
 
-## Getting Started 🌟
+## 📋 Prerequisites
 
-To utilize this playbook:
+- **Operating System**: Ubuntu 20.04 or later
+- **Permissions**: Sudo/root access
+- **Internet**: Active internet connection
+- **Ansible**: Will be auto-installed if missing (via Makefile)
 
-1. Clone this repository to your local machine.
-2. Navigate to `inventories/vars.yml` and update the variables to match your configuration:
+> **🍎 Using macOS?** This playbook requires Ubuntu Linux. See [TESTING_ON_MAC.md](TESTING_ON_MAC.md) for testing options using VMs or containers.
 
-    ```yaml
-    git_user: "your_username"
-    git_email: "your_email@example.com"
-    ssh_user: "your_username"
-    ```
+## 🚀 Quick Start
 
-3. Execute the playbook from the terminal with the following command:
+### Option 1: Using Makefile (Recommended)
 
-    ```bash
-    ansible-playbook -i ./inventories/hosts.ini ./playbook/tools_setup.yml
-    ```
+```bash
+# Clone the repository
+git clone <repository-url>
+cd machine-setup
 
-Enjoy the streamlined setup of your DevOps environment! 🚀
+# Run setup (handles everything automatically)
+make setup
+```
 
+That's it! The Makefile will:
+- Check and install Ansible if needed
+- Verify your system
+- Run the playbook
+- Guide you through the setup
+
+### Option 2: Manual Installation
+
+```bash
+# 1. Install Ansible
+sudo apt update
+sudo apt install -y ansible
+
+# 2. Run the playbook
+ansible-playbook -i ./inventories/hosts.ini ./playbooks/tools_setup.yml
+```
+
+### What to Expect
+
+During setup, you'll be prompted for:
+1. **Git Username** - Your Git username (e.g., `john.doe`)
+2. **Git Email** - Your Git email address (e.g., `john.doe@example.com`)
+
+**Note**: Your hostname will be automatically generated as `DEV-{random_number}` (e.g., `DEV-45678`). You can customize this by setting the `hostname_prefix` variable.
+
+## 📖 Available Commands
+
+The project includes a Makefile with helpful commands:
+
+```bash
+make help              # Show all available commands
+make setup            # Run the Ansible playbook (main command)
+make lint             # Run ansible-lint on all files
+make syntax-check     # Check playbook syntax
+make test             # Run all tests (lint + syntax)
+make install-pre-commit  # Install pre-commit hooks
+make run-pre-commit   # Run pre-commit on all files
+make clean           # Clean up temporary files
+make info            # Display system information
+
+# Testing on Mac (see TESTING_ON_MAC.md)
+make test-multipass  # Test using Multipass (easiest)
+make test-docker     # Test using Docker
+make test-vagrant    # Test using Vagrant
+make test-help       # Show testing options
+```
+
+## ⚙️ Customization
+
+### Custom Hostname Prefix
+
+By default, hostnames are set as `DEV-{random_number}`. To use a custom prefix:
+
+```bash
+ansible-playbook -i ./inventories/hosts.ini ./playbooks/tools_setup.yml -e hostname_prefix=MYORG
+```
+
+### Selective Installation
+
+You can install only specific tools using tags:
+
+```bash
+# Only install DevOps tools
+ansible-playbook -i ./inventories/hosts.ini ./playbooks/tools_setup.yml --tags devops-tools
+
+# Only install browsers
+ansible-playbook -i ./inventories/hosts.ini ./playbooks/tools_setup.yml --tags web-browsers
+
+# Only install communication tools
+ansible-playbook -i ./inventories/hosts.ini ./playbooks/tools_setup.yml --tags communication-tools
+```
+
+### Configure Browsers
+
+Edit `roles/browsers/defaults/main.yml` to select which browsers to install:
+
+```yaml
+browsers:
+  - chrome
+  # - brave  # Comment out to skip
+  # - tor    # Comment out to skip
+```
+
+## 📁 Project Structure
+
+```
+machine-setup/
+├── Makefile                 # Main commands (make setup, make lint, etc.)
+├── playbooks/
+│   └── tools_setup.yml     # Main Ansible playbook
+├── roles/                   # Ansible roles (modular components)
+│   ├── devops/             # DevOps tools (Git, Docker, AWS, etc.)
+│   ├── browsers/           # Web browsers
+│   ├── communication-tools/ # Slack, Zoom, Telegram
+│   └── system-configuration/ # SSH Keys, Oh My Zsh
+├── inventories/
+│   └── hosts.ini           # Inventory file (target hosts)
+├── .ansible-lint           # Ansible lint configuration
+├── .pre-commit-config.yaml # Pre-commit hooks
+├── requirements.yml        # Ansible collections requirements
+└── .github/
+    └── workflows/          # GitHub Actions CI/CD
+```
+
+## ⏱️ Installation Time
+
+- **Fast internet**: ~15 minutes
+- **Slow internet**: ~30 minutes
+
+The playbook shows progress for each tool being installed.
+
+## 🎓 Learning Resources
+
+### For Beginners
+
+- 📖 **[QUICKSTART.md](QUICKSTART.md)** - Step-by-step guide with troubleshooting
+- 📚 **[CONTRIBUTING.md](CONTRIBUTING.md)** - Learn how to contribute
+- 💡 Run `make help` to see all available commands
+
+### For Advanced Users
+
+- 🔧 **[CODE_REVIEW.md](CODE_REVIEW.md)** - Technical documentation and architecture
+- 🧪 Customize roles in `roles/*/defaults/main.yml`
+- 🏗️ Modify tasks in `roles/*/tasks/main.yml`
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+**Issue**: "Ansible not found"
+```bash
+# Solution: Install Ansible
+sudo apt update && sudo apt install -y ansible
+```
+
+**Issue**: "Permission denied"
+```bash
+# Solution: Make sure you have sudo access
+sudo make setup
+```
+
+**Issue**: "Connection refused"
+```bash
+# Solution: Check inventories/hosts.ini
+# Should contain: localhost ansible_connection=local
+```
+
+**Issue**: Installation takes too long
+```bash
+# This is normal! The playbook downloads many tools.
+# Be patient, it typically takes 15-30 minutes.
+```
+
+### Getting Help
+
+- 📖 Check [QUICKSTART.md](QUICKSTART.md) for detailed troubleshooting
+- 🐛 [Open an issue](.github/ISSUE_TEMPLATE/bug_report.md) if you find a bug
+- 💬 Ask questions in discussions
+- 📧 For security issues, see [SECURITY.md](SECURITY.md)
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+Quick contribution steps:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run `make lint` and `make test`
+5. Submit a pull request
+
+## 🔒 Security
+
+- 🔐 All packages use GPG key verification
+- 🛡️ Only official package sources are used
+- 🔑 SSH keys generated with secure defaults (RSA 4096)
+- 🧹 Temporary files are cleaned up after installation
+
+For security concerns, please see [SECURITY.md](SECURITY.md).
+
+## 📝 Code Quality
+
+This project maintains high code quality standards:
+
+- ✅ **Ansible Lint**: All code is linted
+- ✅ **Pre-commit Hooks**: Automatic checks on commit
+- ✅ **GitHub Actions**: CI/CD pipeline for testing
+- ✅ **Best Practices**: Follows Ansible conventions
+
+Run `make lint` to check code quality locally.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Originally developed by [Clouddrove](https://clouddrove.com)
+- Built with [Ansible](https://www.ansible.com/)
+- Community-driven and open-source
+
+## 📊 Project Status
+
+- ✅ **Production Ready**: Tested and stable
+- ✅ **Open Source**: MIT Licensed
+- ✅ **Maintained**: Active development
+- ✅ **Documented**: Comprehensive guides
+
+## 🌟 Star History
+
+If you find this project useful, please consider giving it a ⭐ on GitHub!
+
+---
+
+**Made with ❤️ by the open-source community**
+
+For questions, suggestions, or contributions, please open an issue or pull request!

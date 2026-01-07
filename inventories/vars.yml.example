@@ -1,0 +1,10 @@
+---
+# Example variables file (NOT USED - all variables are in playbook)
+# This file is kept for reference only
+# The playbook now uses vars_prompt for user inputs:
+#   - git_user: Your Git username
+#   - git_email: Your Git email  
+#   - hostname_base: Random number for hostname (CD-IN-UB-XXXXX)
+
+# All other variables are defined in playbooks/tools_setup.yml
+

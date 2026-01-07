@@ -1,0 +1,19 @@
+---
+# Handlers for DevOps role
+# These are triggered when services need to be restarted
+
+- name: restart docker
+  become: yes
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+    enabled: yes
+  failed_when: false
+  ignore_errors: yes
+
+- name: restart ssh
+  become: yes
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted
+    enabled: yes

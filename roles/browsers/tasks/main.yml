@@ -3,54 +3,78 @@
 # ------------------------Brave-Browsers---------------------------------#
 
 - name: Add Brave apt key
-  become: true
-  apt_key:
+  become: yes
+  ansible.builtin.apt_key:
     url: "{{ brave_apt_url }}"
     state: present
     keyring: "{{ brave_apt_keyring }}"
+  when: "'brave' in browsers"
+  tags: ['brave', 'browsers', 'apt_key']
 
 - name: Add Brave repo
-  become: true
-  apt_repository:
+  become: yes
+  ansible.builtin.apt_repository:
     repo: "{{ brave_repo_url }}"
     filename: brave-browser-release
+  when: "'brave' in browsers"
+  tags: ['brave', 'browsers', 'repository']
 
 - name: Install Brave
-  become: true
-  apt:
+  become: yes
+  ansible.builtin.apt:
     name: brave-browser
     state: present
     update_cache: true
+  when: "'brave' in browsers and ansible_architecture != 'aarch64'"
+  tags: ['brave', 'browsers', 'install']
+
+- name: Skip Brave on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Brave Browser is not available for ARM64 architecture. Skipping installation."
+  when: "'brave' in browsers and ansible_architecture == 'aarch64'"
+  tags: ['brave', 'browsers']
 
 # -----------------------------------------------------------------------#
 # ------------------------Chrome-Browser---------------------------------#
 
 - name: Install chrome
-  become: true
-  apt:
+  become: yes
+  ansible.builtin.apt:
     deb: "{{ chrome_url }}"
     state: present
+  when: "'chrome' in browsers and ansible_architecture != 'aarch64'"
+  tags: ['chrome', 'browsers', 'install']
+
+- name: Skip Chrome on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Chrome Browser is not available for ARM64 architecture. Skipping installation."
+  when: "'chrome' in browsers and ansible_architecture == 'aarch64'"
+  tags: ['chrome', 'browsers']
 
 # -----------------------------------------------------------------------#
 # ------------------------Tor-Browser---------------------------------#
 
 - name: Add Tor repo
-  become: true
-  apt_repository:
+  become: yes
+  ansible.builtin.apt_repository:
     repo: "{{ tor_apt_repo }}"
     filename: tor
     update_cache: false
+  when: "'tor' in browsers"
+  tags: ['tor', 'browsers', 'repository']
 
 - name: Add Tor keys
-  become: true
-  apt_key:
+  become: yes
+  ansible.builtin.apt_key:
     url: "{{ tor_apt_url }}"
     state: present
     keyring: "{{ tor_keyring }}"
+  when: "'tor' in browsers"
+  tags: ['tor', 'browsers', 'apt_key']
 
 - name: Install Tor packages
-  become: true
-  apt:
+  become: yes
+  ansible.builtin.apt:
     name:
       - tor
       - tor-geoipdb
@@ -58,4 +82,6 @@
       - deb.torproject.org-keyring
     state: present
     update_cache: true
+  when: "'tor' in browsers"
+  tags: ['tor', 'browsers', 'install']
 ...

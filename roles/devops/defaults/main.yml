@@ -1,0 +1,74 @@
+---
+# Pre-requisite packages
+prereq_pkgs:
+  - ca-certificates
+  - apt-transport-https
+  - lsb-release
+  - gnupg
+  - bash-completion
+  - gnupg2
+  - curl
+  - software-properties-common
+  - virtualenv
+  - python3-setuptools
+  - unzip
+  - libxtst6
+  - libx11-xcb1
+  - libxcb-dri3-0
+  - libasound2
+  - libssl-dev
+  - htop
+  - openssh-server
+
+# AWS CLI - URL will be set dynamically based on architecture
+aws_cli_base_url: https://awscli.amazonaws.com/awscli-exe-linux-
+aws_cli_repo: "{{ aws_cli_base_url }}{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}.zip"
+
+# Kubectl APT Key - Using new official Kubernetes repository
+kubectl_apt_key: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+# kubectl_repo will be set dynamically in tasks based on architecture
+kubectl_keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+# HELM - Using official Helm repository
+# helm_repo_url will be set dynamically in tasks based on architecture
+helm_apt_key: https://baltocdn.com/helm/public.asc
+helm_keyring: /usr/share/keyrings/helm.gpg
+# Alternative: Install Helm via script if apt fails
+helm_install_script: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+# tfswitch url
+tfswitch_url: curl -L https://raw.githubusercontent.com/warrensbox/terraform-switcher/release/install.sh | bash
+
+# Docker
+compose_version: 2.24.5
+# docker_compose_url will be set dynamically in tasks based on architecture
+# docker_repo will be set dynamically in tasks based on architecture
+docker_apt_url: https://download.docker.com/linux/ubuntu/gpg
+
+# Lens
+lens_repository: "deb [arch=amd64 signed-by=/usr/share/keyrings/lens-archive-keyring.gpg] https://downloads.k8slens.dev/apt/debian stable main"
+lens_apt_url: https://downloads.k8slens.dev/keys/gpg
+lens_keyring: /usr/share/keyrings/lens-archive-keyring.gpg
+
+# Visual Studio Code
+vscode_apt_key: https://packages.microsoft.com/keys/microsoft.asc
+vscode_repository: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }} signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
+vscode_keyring: /usr/share/keyrings/microsoft.gpg
+
+# k9s - Kubernetes terminal UI
+k9s_version: v0.28.2
+k9s_base_url: https://github.com/derailed/k9s/releases/download
+k9s_binary_path: /usr/local/bin/k9s
+
+# Azure CLI
+azure_cli_apt_key: https://packages.microsoft.com/keys/microsoft.asc
+azure_cli_repository: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }} signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
+azure_cli_keyring: /usr/share/keyrings/microsoft.gpg
+
+# GCP CLI (gcloud)
+gcp_cli_apt_key: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+gcp_cli_repository: "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
+gcp_cli_keyring: /usr/share/keyrings/cloud.google.gpg
+
+# Ansible
+ansible_install_method: pip  # Options: pip, apt

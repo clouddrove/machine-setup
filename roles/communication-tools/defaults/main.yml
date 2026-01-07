@@ -1,0 +1,14 @@
+---
+# Slack
+slack_version: 4.4.2
+slack_package: "wget -O {{ temp_dir }}/slack-desktop-{{ slack_version }}-amd64.deb https://downloads.slack-edge.com/linux_releases/slack-desktop-{{ slack_version }}-amd64.deb"
+
+# Zoom
+zoom_apt_url: deb=https://zoom.us/client/latest/zoom_amd64.deb
+
+# Discord
+discord_snap_channel: stable
+
+# Microsoft Teams
+teams_download_url: https://teams.microsoft.com/downloads/desktopurl?env=production&plat=linux&arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}&download=true&linuxArchiveType=deb
+teams_package_name: teams

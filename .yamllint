@@ -1,5 +1,5 @@
 ---
-# Based on ansible-lint config
+# YAML Lint Configuration for Ansible
 extends: default
 
 rules:
@@ -15,29 +15,39 @@ rules:
   commas:
     max-spaces-after: -1
     level: error
-  comments: disable
+  comments:
+    min-spaces-from-content: 1
   comments-indentation: disable
-  document-start: enable
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+  document-start: disable  # Ansible files don't always start with ---
   empty-lines:
-    max: 3
+    max: 1
     level: error
   hyphens:
     level: error
-  indentation: enable
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
   key-duplicates: enable
   line-length: disable
-  new-line-at-end-of-file: enable
+  new-line-at-end-of-file: disable  # Some Ansible files don't need this
   new-lines:
     type: unix
   trailing-spaces: enable
   truthy:
-    level: warning
+    level: warning  # Allow yes/no for Ansible (standard practice)
     allowed-values:
       - 'true'
       - 'false'
       - 'yes'
       - 'no'
+      - 'on'
+      - 'off'
+
 yaml-files:
   - '*.yml'
+  - '*.yaml'
   - '.yamllint'
-...

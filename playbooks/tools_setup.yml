@@ -1,21 +1,197 @@
 ---
-- hosts: all
-  vars_files:
-    -./ubuntu-setup/inventories/vars.yml
+# ============================================================================
+# DevOps Machine Setup Playbook
+# ============================================================================
+# This playbook automatically installs all DevOps tools on your Ubuntu machine
+# Just run it and answer 2 simple questions!
+# Hostname is automatically generated as CD-IN-UB-{random_number}
+# ============================================================================
+
+- name: DevOps Machine Setup
+  hosts: all
+  vars_prompt:
+    - name: git_user
+      prompt: |
+        📝 What's your Git username?
+        (This will be used for git config - e.g., "john.doe" or "johndoe")
+      private: false
+    - name: git_email
+      prompt: |
+        📧 What's your Git email?
+        (This will be used for git config - e.g., "john.doe@company.com")
+      private: false
+
+  vars:
+    # Hostname prefix (customize this for your organization)
+    # Default: DEV, can be overridden by setting hostname_prefix in inventory or command line
+    hostname_prefix: "{{ hostname_prefix | default('DEV') }}"
+
+    # Generate a random 5-digit number for hostname (10000-99999)
+    hostname_base: "{{ range(10000, 100000) | random }}"
+
+    # Hostname will be set as: {prefix}-{random_number}
+    # Default: DEV-{random_number}
+    # To customize: ansible-playbook ... -e hostname_prefix=MYORG
+    hostname: "{{ hostname_prefix }}-{{ hostname_base }}"
+
+    # Temporary directory for downloads
+    temp_dir: /tmp
+
+    # SSH key will use your Git username
+    ssh_user: "{{ git_user }}"
+
+  pre_tasks:
+    # System checks - Verify OS and architecture
+    - name: Check if running on Ubuntu
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Ubuntu"
+          - ansible_distribution_major_version|int >= 20
+        fail_msg: "This playbook is designed for Ubuntu 20.04 or later"
+        success_msg: "✓ Ubuntu {{ ansible_distribution_version }} detected"
+
+    - name: Check system architecture
+      ansible.builtin.debug:
+        msg: "System architecture: {{ ansible_architecture }}"
+      changed_when: false
+
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - git_user is defined
+          - git_email is defined
+          - git_email | regex_search('.*@.*\\..*')
+        fail_msg: "Git user and valid email are required"
+        success_msg: "✓ Git configuration validated"
+
+    # Display the generated hostname
+    - name: Display generated hostname
+      ansible.builtin.debug:
+        msg: "🖥️  Hostname will be set to: {{ hostname }}"
+      changed_when: false
+
+    # Set the hostname to CD-IN-UB-{random_number}
+    # Skip in Docker containers (hostname changes not allowed)
+    - name: Check if running in Docker
+      ansible.builtin.stat:
+        path: /.dockerenv
+      register: docker_check
+      failed_when: false
+      changed_when: false
+
+    - name: Set hostname
+      become: yes
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"
+      when:
+        - hostname is defined
+        - not docker_check.stat.exists
+
+    # Update /etc/hosts file with the new hostname
+    - name: Update /etc/hosts with new hostname
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1.*'
+        line: "127.0.1.1 {{ hostname }}"
+        state: present
+      when:
+        - hostname is defined
+        - not docker_check.stat.exists
+
+    - name: Display hostname info for Docker
+      ansible.builtin.debug:
+        msg: "⚠️  Running in Docker - hostname change skipped (not supported in containers)"
+      when: docker_check.stat.exists
+
+  # ============================================================================
+  # Roles - Each role installs a group of related tools
+  # ============================================================================
   roles:
+    # DevOps tools: Git, Docker, AWS CLI, Kubectl, Helm, Terraform, Lens
     - role: devops
       tags:
         - devops-tools
 
+    # Web browsers: Chrome, Brave, Tor
     - role: browsers
       tags:
         - web-browsers
 
+    # Communication tools: Slack, Zoom, Telegram
     - role: communication-tools
       tags:
         - communication-tools
 
-    - role: system-coniguration
+    # System configuration: SSH Keys, Oh My Zsh
+    - role: system-configuration
       tags:
-        - system-coniguration-tools
+        - system-configuration-tools
+
+  post_tasks:
+    # Verification tasks
+    - name: Verify installed tools
+      ansible.builtin.command: "{{ item }} --version"
+      register: tool_version
+      failed_when: false
+      changed_when: false
+      loop:
+        - git
+        - docker
+        - aws
+        - az
+        - gcloud
+        - kubectl
+        - helm
+        - k9s
+        - code
+        - ansible
+      tags:
+        - verification
+        - never
+
+    - name: Display installation summary
+      ansible.builtin.debug:
+        msg: |
+          ✅ Installation Complete!
+
+          Installed DevOps Tools:
+          - Git: {{ tool_version.results[0].stdout | default('N/A') }}
+          - Docker: {{ tool_version.results[1].stdout | default('N/A') }}
+          - AWS CLI: {{ tool_version.results[2].stdout | default('N/A') }}
+          - Azure CLI: {{ tool_version.results[3].stdout | default('N/A') }}
+          - GCP CLI: {{ tool_version.results[4].stdout | default('N/A') }}
+          - Kubectl: {{ tool_version.results[5].stdout | default('N/A') }}
+          - Helm: {{ tool_version.results[6].stdout | default('N/A') }}
+          - k9s: {{ tool_version.results[7].stdout | default('N/A') }}
+          - VS Code: {{ tool_version.results[8].stdout | default('N/A') }}
+          - Ansible: {{ tool_version.results[9].stdout | default('N/A') }}
+
+          Next Steps:
+          1. Restart your terminal or run: source ~/.zshrc
+          2. Verify installations with: git --version, docker --version, etc.
+          3. Configure cloud CLIs: aws configure, az login, gcloud init
+      changed_when: false
+      tags:
+        - verification
+        - never
+
+    # Cleanup temporary files
+    - name: Cleanup temporary files
+      become: yes
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ temp_dir }}/aws"
+        - "{{ temp_dir }}/slack-desktop-*.deb"
+        - "{{ temp_dir }}/zoom_*.deb"
+        - "{{ temp_dir }}/teams-*.deb"
+        - "{{ temp_dir }}/k9s"
+        - "{{ temp_dir }}/k9s.tar.gz"
+        - "{{ temp_dir }}/{{ zsh_script_file | default('zsh_install.sh') }}"
+      failed_when: false
+      tags:
+        - cleanup
+        - never
 ...
