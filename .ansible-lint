@@ -6,6 +6,7 @@
 skip_list:
   - yaml[line-length]              # Allow longer lines for readability
   - yaml[empty-lines]               # Allow empty lines at end of files
+  - yaml[truthy]                    # Allow yes/no for Ansible (standard practice)
   - name[casing]                   # Allow various naming conventions
   - name[template]                  # Allow template names
   - var-naming[no-role-prefix]      # Variables in defaults/main.yml don't need role prefix
@@ -14,6 +15,7 @@ skip_list:
   - risky-file-permissions          # File permissions are explicitly set
   - ignore-errors                   # ignore_errors is used intentionally for cleanup
   - no-changed-when                 # Some tasks intentionally don't have changed_when
+  - yaml[schema]                    # Skip strict YAML schema validation (Ansible uses yes/no)
 
 # Enable additional rules
 enable_list:
