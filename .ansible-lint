@@ -16,6 +16,8 @@ skip_list:
   - ignore-errors                   # ignore_errors is used intentionally for cleanup
   - no-changed-when                 # Some tasks intentionally don't have changed_when
   - yaml[schema]                    # Skip strict YAML schema validation (Ansible uses yes/no)
+  - name[play]                      # Play names are optional for simple playbooks
+  - name[role]                      # Allow hyphenated role names (communication-tools, system-configuration)
 
 # Enable additional rules
 enable_list:
