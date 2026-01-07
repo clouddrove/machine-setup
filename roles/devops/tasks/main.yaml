@@ -3,19 +3,19 @@
 # ------------------------Pre-requisite Packages-------------------------#
 
 - name: fix broken Packages.
-  become: true
+  become: yes
   ansible.builtin.shell: apt --fix-broken install -y
   ignore_errors: yes
 
 - name: Update the server
-  become: true
+  become: yes
   ansible.builtin.apt:
     upgrade: 'safe'
     update_cache: true
   tags: ['update', 'server']
 
 - name: Install Pre-requisite Packages
-  become: true
+  become: yes
   ansible.builtin.apt:
     name: "{{ prereq_pkgs }}"
     state: 'present'
@@ -25,7 +25,7 @@
 # ------------------------AWS_CLI--------------------------------------------#
 
 - name: Uninstall AWS CLI V1
-  become: true
+  become: yes
   ansible.builtin.apt:
     name: 'awscli'
     state: 'absent'
@@ -49,7 +49,7 @@
   delay: 5
 
 - name: Run the AWS CLI V2 installer
-  become: true
+  become: yes
   ansible.builtin.shell: "{{ temp_dir }}/aws/install --update"
   tags: ['install', 'awscli']
   register: download_result
@@ -58,7 +58,7 @@
   delay: 10
 
 - name: Verify AWS CLI installation and print version
-  become: true
+  become: yes
   ansible.builtin.command: aws --version
   register: aws_version
   changed_when: false
@@ -75,13 +75,13 @@
 # ------------------------KUBECTL----------------------------------------------#
 
 - name: Install Pre-requisite Packages
-  become: true
+  become: yes
   ansible.builtin.apt:
     name: "{{ prereq_pkgs }}"
     state: present
 
 - name: Add kubectl apt key
-  become: true
+  become: yes
   ansible.builtin.apt_key:
     url: "{{ kubectl_apt_key }}"
     state: present
@@ -89,14 +89,14 @@
   tags: ['kubectl', 'apt_key']
 
 - name: Add kubectl repository
-  become: true
+  become: yes
   ansible.builtin.apt_repository:
     repo: "{{ kubectl_repo }}"
     filename: kubernetes
   tags: ['kubectl', 'repository']
 
 - name: Install kubectl
-  become: true
+  become: yes
   ansible.builtin.apt:
     name: kubectl
     state: present
@@ -109,7 +109,7 @@
   tags: ['kubectl', 'install']
 
 - name: Verify Kubectl installation and print version
-  become: true
+  become: yes
   ansible.builtin.command: kubectl version --client
   register: kubectl_version_output
   changed_when: false
@@ -126,21 +126,21 @@
 # ------------------------HELM-------------------------------------------------#
 
 - name: Add Helm apt key
-  become: true
+  become: yes
   ansible.builtin.apt_key:
     url: "{{ helm_apt_key }}"
     state: present
   tags: ['helm', 'apt_key']
 
 - name: Add Helm repository
-  become: true
+  become: yes
   ansible.builtin.apt_repository:
     repo: "{{ helm_repo_url }}"
     filename: helm
   tags: ['helm', 'repository']
 
 - name: Install Helm and enable auto-completion
-  become: true
+  become: yes
   block:
     - name: Install Helm
       ansible.builtin.apt:
@@ -169,14 +169,14 @@
       tags: ['helm', 'completion']
 
     - name: Enable Helm auto-completion
-      become: true
+      become: yes
       ansible.builtin.shell: helm completion bash > /etc/bash_completion.d/helm
       args:
         creates: /etc/bash_completion.d/helm
       tags: ['helm', 'completion']
 
 - name: Verify Helm installation
-  become: true
+  become: yes
   ansible.builtin.command: helm version --short
   register: helm_version
   changed_when: false
@@ -193,30 +193,30 @@
 # ------------------------DOCKER-------------------------#
 
 - name: Update apt
-  become: true
+  become: yes
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
 
 - name: Add Docker GPG Key
-  become: true
+  become: yes
   ansible.builtin.apt_key:
     url: "{{ docker_apt_url }}"
     state: present
 
 - name: Add Docker Repository
-  become: true
+  become: yes
   ansible.builtin.apt_repository:
     repo: "{{ docker_repo }}"
 
 - name: Update apt
-  become: true
+  become: yes
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
 
 - name: Install Docker
-  become: true
+  become: yes
   ansible.builtin.apt:
     name:
       - docker-ce
@@ -227,9 +227,11 @@
   until: download_result is succeeded
   retries: 3
   delay: 10
+  notify: restart docker
+  tags: ['docker', 'install']
 
 - name: Verify Docker installation and print version
-  become: true
+  become: yes
   ansible.builtin.command: docker --version
   register: docker_version
   changed_when: false
@@ -245,7 +247,7 @@
 # ------------------------DOCKER-COMPOSE-------------------------#
 
 - name: Download and install docker-compose
-  become: true
+  become: yes
   ansible.builtin.get_url:
     url: "{{ docker_compose_url }}"
     dest: /usr/local/bin/docker-compose
@@ -257,20 +259,20 @@
   delay: 10
 
 - name: Ensure Docker group exists
-  become: true
+  become: yes
   ansible.builtin.group:
     name: docker
     state: present
 
 - name: Add User to Docker Group
-  become: true
+  become: yes
   ansible.builtin.user:
     append: true
     groups: docker
     name: "{{ ansible_user_id }}"
 
 - name: Verify Docker-compose installation and print version
-  become: true
+  become: yes
   ansible.builtin.command: docker-compose version --short
   register: docker_compose_version
   changed_when: false
@@ -287,7 +289,7 @@
 # ------------------------Git----------------------------#
 
 - name: Install git
-  become: true
+  become: yes
   ansible.builtin.apt:
     name: git
     state: present
@@ -295,13 +297,13 @@
   register: download_result
 
 - name: Create user dir
-  become: true
+  become: yes
   ansible.builtin.file:
     path: /home/{{ ansible_user }}
     state: directory
 
 - name: Copy git config
-  become: true
+  become: yes
   ansible.builtin.template:
     src: gitconfig.j2
     dest: "/home/{{ ansible_user }}/.gitconfig"
@@ -309,7 +311,7 @@
     mode: 0640
 
 - name: Verify Git installation and print version
-  become: true
+  become: yes
   ansible.builtin.command: git --version
   register: git_version
   changed_when: false
@@ -324,21 +326,21 @@
 # ------------------------Lens---------------------------#
 
 - name: Import Lens Desktop public security key
-  become: true
+  become: yes
   ansible.builtin.apt_key:
     url: "{{ lens_apt_url }}"
     state: present
     keyring: "{{ lens_keyring }}"
 
 - name: Add the Lens Desktop repository
-  become: true
+  become: yes
   ansible.builtin.apt_repository:
     repo: "{{ lens_repository }}"
     state: present
     filename: lens
 
 - name: Set priority for the stable channel
-  become: true
+  become: yes
   ansible.builtin.copy:
     content: |
       Package: *
@@ -348,7 +350,7 @@
     mode: '0644'
 
 - name: Install or update Lens Desktop
-  become: true
+  become: yes
   ansible.builtin.apt:
     update_cache: true
     name: lens
@@ -374,7 +376,7 @@
   changed_when: false
 
 - name: Download and execute the tf-switcher installation script
-  become: true
+  become: yes
   ansible.builtin.shell: "{{ tfswitch_url }}"
   register: download_result
   when: tfswitch_check.rc != 0
@@ -382,7 +384,7 @@
   delay: 5
 
 - name: Verify tfswitch installation and print version
-  become: true
+  become: yes
   ansible.builtin.command: tfswitch --version
   register: tfswitch_version
   changed_when: false

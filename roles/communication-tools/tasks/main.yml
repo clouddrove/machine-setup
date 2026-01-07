@@ -2,68 +2,77 @@
 # -------------------------------------------------------------------------#
 # ------------------------Slack--------------------------------------------#
 - name: apt-get update
-  become: true
+  become: yes
   ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
+  tags: ['slack', 'communication-tools', 'update']
 
 - name: install gdebi
-  become: true
+  become: yes
   ansible.builtin.apt:
     name: gdebi
     state: present
+  tags: ['slack', 'communication-tools', 'prerequisites']
 
 - name: Check if slack is installed
   ansible.builtin.command: dpkg-query -W slack-desktop
   register: check_slack
   failed_when: false
   changed_when: false
+  tags: ['slack', 'communication-tools', 'check']
 
 - name: Download Ubuntu slack package
-  become: true
+  become: yes
   ansible.builtin.command: "{{ slack_package }}"
   args:
     creates: "{{ temp_dir }}/slack-desktop-{{ slack_version }}-amd64.deb"
   when: check_slack.rc == 1
   retries: 3
   delay: 5
+  tags: ['slack', 'communication-tools', 'download']
 
 - name: Install Slack
-  become: true
+  become: yes
   ansible.builtin.apt:
     deb: "{{ temp_dir }}/slack-desktop-{{ slack_version }}-amd64.deb"
     state: present
   when: check_slack.rc == 1
+  tags: ['slack', 'communication-tools', 'install']
 
 # -------------------------------------------------------------------------#
 # ------------------------Zoom---------------------------------------------#
 
 - name: Download Zoom package
-  become: true
+  become: yes
   ansible.builtin.get_url:
     url: "https://zoom.us/client/latest/zoom_amd64.deb"
     dest: "{{ temp_dir }}/zoom_amd64.deb"
     timeout: 30
   retries: 3
   delay: 5
+  tags: ['zoom', 'communication-tools', 'download']
 
 - name: Install zoom
-  become: true
+  become: yes
   ansible.builtin.apt:
     deb: "{{ temp_dir }}/zoom_amd64.deb"
     state: present
+  tags: ['zoom', 'communication-tools', 'install']
 
 # --------------------------------------------------------------------------#
 # ------------------------Telegram------------------------------------------#
 
 - name: Add Telegram repository
-  become: true
+  become: yes
   ansible.builtin.apt_repository:
     repo: 'ppa:atareao/telegram'
+  tags: ['telegram', 'communication-tools', 'repository']
 
 - name: Install Telegram
-  become: true
+  become: yes
   ansible.builtin.package:
     name: telegram
     state: present
+  tags: ['telegram', 'communication-tools', 'install']
 ...

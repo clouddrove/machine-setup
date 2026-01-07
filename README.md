@@ -1,10 +1,12 @@
 # DevOps Tools Setup 🛠️
 
-Prepared by Clouddrove, this Ansible role is meticulously designed to facilitate the seamless setup of your machine with a suite of essential DevOps tools. 🚀
+An open-source Ansible playbook designed to automate the setup of your Ubuntu machine with a comprehensive suite of essential DevOps tools. 🚀
+
+Originally developed by [Clouddrove](https://clouddrove.com), this project is now open-source and community-driven.
 
 The playbook is primed for execution on the local host, ensuring a swift and hassle-free environment setup. 💻
 
-Currently, it is optimized for Ubuntu-based Linux distributions. 🐧
+Currently, it is optimized for Ubuntu-based Linux distributions (20.04 or later). 🐧
 
 ## Included Tools 🧰
 
@@ -28,7 +30,6 @@ The playbook automates the installation of the following tools:
 | Lens               | Kubernetes IDE 🔍                                             |
 | SSH Keys           | Secure shell keys for authentication 🔑                       |
 | Oh My Zsh          | Interactive shell tool for managing Zsh configuration 🖥️     |
-
 
 ## Prerequisite Packages 📦
 
@@ -57,16 +58,16 @@ In addition to the tools, the playbook installs the following prerequisite packa
 
 ## Getting Started 🌟
 
-### For Beginners (Easiest Way)
+### Quick Start (Recommended)
 
 **Just run one command:**
 ```bash
-./setup.sh
+make setup
 ```
 
-That's it! The script will handle everything.
+That's it! The Makefile will handle everything including prerequisite checks.
 
-### Manual Setup (If you prefer)
+### Manual Setup
 
 1. **Install Ansible** (if not already installed):
    ```bash
@@ -83,11 +84,34 @@ That's it! The script will handle everything.
    - Your Git username (e.g., `john.doe`)
    - Your Git email (e.g., `john.doe@company.com`)
 
-**Note**: Hostname is automatically generated as `CD-IN-UB-{random_number}` (e.g., `CD-IN-UB-45678`)
+**Note**: Hostname is automatically generated as `DEV-{random_number}` (e.g., `DEV-45678`). 
+You can customize the prefix by setting `hostname_prefix` variable (e.g., `-e hostname_prefix=MYORG`)
 
 ### 📖 New to Ansible?
 
 Check out our **[QUICKSTART.md](QUICKSTART.md)** guide for step-by-step instructions!
+
+## Available Make Commands 🛠️
+
+The project includes a Makefile with helpful commands:
+
+```bash
+make help              # Show all available commands
+make setup            # Run the Ansible playbook (main command)
+make lint             # Run ansible-lint on all files
+make syntax-check     # Check playbook syntax
+make test            # Run all tests (lint + syntax)
+make install-pre-commit  # Install pre-commit hooks
+make run-pre-commit   # Run pre-commit on all files
+make clean           # Clean up temporary files
+make info            # Display system information
+```
+
+### Most Common Commands
+
+- **Setup your machine**: `make setup`
+- **Check code quality**: `make lint`
+- **Install pre-commit hooks**: `make install-pre-commit`
 
 ## What Gets Installed? 🧰
 
@@ -122,11 +146,41 @@ The playbook automatically installs all these tools:
 
 The playbook will show progress for each tool being installed.
 
+## Code Quality 🔍
+
+This project includes:
+
+- **Ansible Lint**: Run `make lint` to check code quality
+- **Pre-commit Hooks**: Install with `make install-pre-commit`
+- **GitHub Actions**: Automated linting on push/PR
+- **Syntax Checking**: Run `make syntax-check` before committing
+
 ## 🆘 Need Help?
 
 - 📖 Read [QUICKSTART.md](QUICKSTART.md) for detailed guide
 - 🔍 Check playbook output for specific errors
 - 💬 Ask your mentor or team lead
+- 📋 Run `make help` to see all available commands
+
+## Project Structure 📁
+
+```
+machine-setup/
+├── Makefile                 # Main commands (make setup, make lint, etc.)
+├── playbooks/
+│   └── tools_setup.yml     # Main Ansible playbook
+├── roles/                   # Ansible roles
+│   ├── devops/             # DevOps tools (Git, Docker, AWS, etc.)
+│   ├── browsers/           # Web browsers
+│   ├── communication-tools/ # Slack, Zoom, Telegram
+│   └── system-configuration/ # SSH Keys, Oh My Zsh
+├── inventories/
+│   └── hosts.ini           # Inventory file
+├── .ansible-lint           # Ansible lint configuration
+├── .pre-commit-config.yaml # Pre-commit hooks
+└── .github/
+    └── workflows/          # GitHub Actions workflows
+```
 
 Enjoy the streamlined setup of your DevOps environment! 🚀
 

@@ -21,11 +21,17 @@
       private: false
 
   vars:
+    # Hostname prefix (customize this for your organization)
+    # Default: DEV, can be overridden by setting hostname_prefix in inventory or command line
+    hostname_prefix: "{{ hostname_prefix | default('DEV') }}"
+    
     # Generate a random 5-digit number for hostname (10000-99999)
     hostname_base: "{{ range(10000, 100000) | random }}"
     
-    # Hostname will be set as: CD-IN-UB-{random_number}
-    hostname: "CD-IN-UB-{{ hostname_base }}"
+    # Hostname will be set as: {prefix}-{random_number}
+    # Default: DEV-{random_number}
+    # To customize: ansible-playbook ... -e hostname_prefix=MYORG
+    hostname: "{{ hostname_prefix }}-{{ hostname_base }}"
 
     # Temporary directory for downloads
     temp_dir: /tmp
@@ -34,21 +40,45 @@
     ssh_user: "{{ git_user }}"
 
   pre_tasks:
+    # System checks - Verify OS and architecture
+    - name: Check if running on Ubuntu
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Ubuntu"
+          - ansible_distribution_major_version|int >= 20
+        fail_msg: "This playbook is designed for Ubuntu 20.04 or later"
+        success_msg: "✓ Ubuntu {{ ansible_distribution_version }} detected"
+
+    - name: Check system architecture
+      ansible.builtin.debug:
+        msg: "System architecture: {{ ansible_architecture }}"
+      changed_when: false
+
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - git_user is defined
+          - git_email is defined
+          - git_email | regex_search('.*@.*\\..*')
+        fail_msg: "Git user and valid email are required"
+        success_msg: "✓ Git configuration validated"
+
     # Display the generated hostname
     - name: Display generated hostname
       ansible.builtin.debug:
         msg: "🖥️  Hostname will be set to: {{ hostname }}"
+      changed_when: false
     
     # Set the hostname to CD-IN-UB-{random_number}
     - name: Set hostname
-      become: true
+      become: yes
       ansible.builtin.hostname:
         name: "{{ hostname }}"
       when: hostname is defined
 
     # Update /etc/hosts file with the new hostname
     - name: Update /etc/hosts with new hostname
-      become: true
+      become: yes
       ansible.builtin.lineinfile:
         path: /etc/hosts
         regexp: '^127\.0\.1\.1.*'
@@ -79,4 +109,57 @@
     - role: system-configuration
       tags:
         - system-configuration-tools
+
+  post_tasks:
+    # Verification tasks
+    - name: Verify installed tools
+      ansible.builtin.command: "{{ item }} --version"
+      register: tool_version
+      failed_when: false
+      changed_when: false
+      loop:
+        - git
+        - docker
+        - aws
+        - kubectl
+        - helm
+      tags:
+        - verification
+        - never
+
+    - name: Display installation summary
+      ansible.builtin.debug:
+        msg: |
+          ✅ Installation Complete!
+          
+          Installed Tools:
+          - Git: {{ tool_version.results[0].stdout | default('N/A') }}
+          - Docker: {{ tool_version.results[1].stdout | default('N/A') }}
+          - AWS CLI: {{ tool_version.results[2].stdout | default('N/A') }}
+          - Kubectl: {{ tool_version.results[3].stdout | default('N/A') }}
+          - Helm: {{ tool_version.results[4].stdout | default('N/A') }}
+          
+          Next Steps:
+          1. Restart your terminal or run: source ~/.zshrc
+          2. Verify installations with: git --version, docker --version, etc.
+      changed_when: false
+      tags:
+        - verification
+        - never
+
+    # Cleanup temporary files
+    - name: Cleanup temporary files
+      become: yes
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ temp_dir }}/aws"
+        - "{{ temp_dir }}/slack-desktop-*.deb"
+        - "{{ temp_dir }}/zoom_amd64.deb"
+        - "{{ temp_dir }}/{{ zsh_script_file | default('zsh_install.sh') }}"
+      failed_when: false
+      tags:
+        - cleanup
+        - never
 ...

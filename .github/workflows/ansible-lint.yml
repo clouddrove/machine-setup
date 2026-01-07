@@ -1,0 +1,63 @@
+---
+name: Ansible Lint
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '.ansible-lint'
+      - '.github/workflows/ansible-lint.yml'
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '.ansible-lint'
+      - '.github/workflows/ansible-lint.yml'
+  workflow_dispatch:
+
+jobs:
+  ansible-lint:
+    name: Run Ansible Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible ansible-lint yamllint
+
+      - name: Install Ansible collections
+        run: |
+          if [ -f requirements.yml ]; then
+            ansible-galaxy collection install -r requirements.yml
+          fi
+
+      - name: Run ansible-lint
+        run: |
+          ansible-lint --version
+          ansible-lint --force-color --exclude=molecule/ --exclude=.molecule/ --exclude=.github/
+
+      - name: Check playbook syntax
+        run: |
+          ansible-playbook --syntax-check playbooks/tools_setup.yml
+

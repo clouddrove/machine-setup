@@ -1,0 +1,39 @@
+---
+# Ansible Lint Configuration
+# https://ansible-lint.readthedocs.io/en/latest/configuring.html
+
+# Skip certain rules that are acceptable for this project
+skip_list:
+  - yaml[line-length]              # Allow longer lines for readability
+  - yaml[empty-lines]               # Allow empty lines at end of files
+  - name[casing]                   # Allow various naming conventions
+  - name[template]                  # Allow template names
+  - var-naming[no-role-prefix]      # Variables in defaults/main.yml don't need role prefix
+  - command-instead-of-module       # Some commands are necessary (e.g., dpkg-query)
+  - command-instead-of-shell        # Shell needed for some installations (tfswitch)
+  - risky-file-permissions          # File permissions are explicitly set
+  - ignore-errors                   # ignore_errors is used intentionally for cleanup
+  - no-changed-when                 # Some tasks intentionally don't have changed_when
+
+# Enable additional rules
+enable_list:
+  - no-changed-when-needed
+  - no-jinja-when
+
+# Exclude paths
+exclude_paths:
+  - .github/
+  - molecule/
+  - .molecule/
+  - .git/
+  - roles/system-configuration/tasks/main.yml  # Temporarily exclude until community.crypto is installed
+
+# Use default rules
+use_default_rules: true
+
+# Verbosity
+verbosity: 1
+
+# Profile (min, basic, moderate, production, safety)
+profile: basic
+

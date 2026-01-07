@@ -3,59 +3,65 @@
 # ------------------------Brave-Browsers---------------------------------#
 
 - name: Add Brave apt key
-  become: true
+  become: yes
   ansible.builtin.apt_key:
     url: "{{ brave_apt_url }}"
     state: present
     keyring: "{{ brave_apt_keyring }}"
   when: "'brave' in browsers"
+  tags: ['brave', 'browsers', 'apt_key']
 
 - name: Add Brave repo
-  become: true
+  become: yes
   ansible.builtin.apt_repository:
     repo: "{{ brave_repo_url }}"
     filename: brave-browser-release
   when: "'brave' in browsers"
+  tags: ['brave', 'browsers', 'repository']
 
 - name: Install Brave
-  become: true
+  become: yes
   ansible.builtin.apt:
     name: brave-browser
     state: present
     update_cache: true
   when: "'brave' in browsers"
+  tags: ['brave', 'browsers', 'install']
 
 # -----------------------------------------------------------------------#
 # ------------------------Chrome-Browser---------------------------------#
 
 - name: Install chrome
-  become: true
+  become: yes
   ansible.builtin.apt:
     deb: "{{ chrome_url }}"
     state: present
   when: "'chrome' in browsers"
+  tags: ['chrome', 'browsers', 'install']
 
 # -----------------------------------------------------------------------#
 # ------------------------Tor-Browser---------------------------------#
 
 - name: Add Tor repo
-  become: true
+  become: yes
   ansible.builtin.apt_repository:
     repo: "{{ tor_apt_repo }}"
     filename: tor
     update_cache: false
   when: "'tor' in browsers"
+  tags: ['tor', 'browsers', 'repository']
 
 - name: Add Tor keys
-  become: true
+  become: yes
   ansible.builtin.apt_key:
     url: "{{ tor_apt_url }}"
     state: present
     keyring: "{{ tor_keyring }}"
   when: "'tor' in browsers"
+  tags: ['tor', 'browsers', 'apt_key']
 
 - name: Install Tor packages
-  become: true
+  become: yes
   ansible.builtin.apt:
     name:
       - tor
@@ -65,4 +71,5 @@
     state: present
     update_cache: true
   when: "'tor' in browsers"
+  tags: ['tor', 'browsers', 'install']
 ...
