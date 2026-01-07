@@ -12,4 +12,3 @@ discord_snap_channel: stable
 # Microsoft Teams
 teams_download_url: https://teams.microsoft.com/downloads/desktopurl?env=production&plat=linux&arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}&download=true&linuxArchiveType=deb
 teams_package_name: teams
-

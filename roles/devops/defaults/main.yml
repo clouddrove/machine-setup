@@ -72,4 +72,3 @@ gcp_cli_keyring: /usr/share/keyrings/cloud.google.gpg
 
 # Ansible
 ansible_install_method: pip  # Options: pip, apt
-

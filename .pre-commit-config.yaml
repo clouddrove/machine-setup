@@ -47,4 +47,3 @@ repos:
     hooks:
       - id: shellcheck
         args: ['-e', 'SC1091']  # Exclude source file warnings
-

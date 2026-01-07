@@ -17,4 +17,3 @@ brave_apt_keyring: /etc/apt/trusted.gpg.d/brave-browser-release.gpg
 tor_apt_url: https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc
 tor_apt_repo: "deb https://deb.torproject.org/torproject.org/ {{ ansible_distribution_release }} main"
 tor_keyring: /etc/apt/trusted.gpg.d/torproject.gpg
-

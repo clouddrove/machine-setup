@@ -60,4 +60,3 @@ jobs:
       - name: Check playbook syntax
         run: |
           ansible-playbook --syntax-check playbooks/tools_setup.yml
-
