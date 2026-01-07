@@ -70,11 +70,21 @@
       changed_when: false
     
     # Set the hostname to CD-IN-UB-{random_number}
+    # Skip in Docker containers (hostname changes not allowed)
+    - name: Check if running in Docker
+      ansible.builtin.stat:
+        path: /.dockerenv
+      register: docker_check
+      failed_when: false
+      changed_when: false
+
     - name: Set hostname
       become: yes
       ansible.builtin.hostname:
         name: "{{ hostname }}"
-      when: hostname is defined
+      when: 
+        - hostname is defined
+        - not docker_check.stat.exists
 
     # Update /etc/hosts file with the new hostname
     - name: Update /etc/hosts with new hostname
@@ -84,7 +94,14 @@
         regexp: '^127\.0\.1\.1.*'
         line: "127.0.1.1 {{ hostname }}"
         state: present
-      when: hostname is defined
+      when: 
+        - hostname is defined
+        - not docker_check.stat.exists
+
+    - name: Display hostname info for Docker
+      ansible.builtin.debug:
+        msg: "⚠️  Running in Docker - hostname change skipped (not supported in containers)"
+      when: docker_check.stat.exists
 
   # ============================================================================
   # Roles - Each role installs a group of related tools
@@ -121,8 +138,13 @@
         - git
         - docker
         - aws
+        - az
+        - gcloud
         - kubectl
         - helm
+        - k9s
+        - code
+        - ansible
       tags:
         - verification
         - never
@@ -132,16 +154,22 @@
         msg: |
           ✅ Installation Complete!
           
-          Installed Tools:
+          Installed DevOps Tools:
           - Git: {{ tool_version.results[0].stdout | default('N/A') }}
           - Docker: {{ tool_version.results[1].stdout | default('N/A') }}
           - AWS CLI: {{ tool_version.results[2].stdout | default('N/A') }}
-          - Kubectl: {{ tool_version.results[3].stdout | default('N/A') }}
-          - Helm: {{ tool_version.results[4].stdout | default('N/A') }}
+          - Azure CLI: {{ tool_version.results[3].stdout | default('N/A') }}
+          - GCP CLI: {{ tool_version.results[4].stdout | default('N/A') }}
+          - Kubectl: {{ tool_version.results[5].stdout | default('N/A') }}
+          - Helm: {{ tool_version.results[6].stdout | default('N/A') }}
+          - k9s: {{ tool_version.results[7].stdout | default('N/A') }}
+          - VS Code: {{ tool_version.results[8].stdout | default('N/A') }}
+          - Ansible: {{ tool_version.results[9].stdout | default('N/A') }}
           
           Next Steps:
           1. Restart your terminal or run: source ~/.zshrc
           2. Verify installations with: git --version, docker --version, etc.
+          3. Configure cloud CLIs: aws configure, az login, gcloud init
       changed_when: false
       tags:
         - verification
@@ -156,7 +184,10 @@
       loop:
         - "{{ temp_dir }}/aws"
         - "{{ temp_dir }}/slack-desktop-*.deb"
-        - "{{ temp_dir }}/zoom_amd64.deb"
+        - "{{ temp_dir }}/zoom_*.deb"
+        - "{{ temp_dir }}/teams-*.deb"
+        - "{{ temp_dir }}/k9s"
+        - "{{ temp_dir }}/k9s.tar.gz"
         - "{{ temp_dir }}/{{ zsh_script_file | default('zsh_install.sh') }}"
       failed_when: false
       tags:

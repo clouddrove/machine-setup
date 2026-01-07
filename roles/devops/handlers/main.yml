@@ -8,6 +8,8 @@
     name: docker
     state: restarted
     enabled: yes
+  failed_when: false
+  ignore_errors: yes
 
 - name: restart ssh
   become: yes

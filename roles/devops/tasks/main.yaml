@@ -38,10 +38,15 @@
     state: 'absent'
   tags: ['cleanup', 'awscli']
 
+- name: Set AWS CLI download URL based on architecture
+  ansible.builtin.set_fact:
+    aws_cli_download_url: "{{ aws_cli_base_url }}{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}.zip"
+  tags: ['awscli']
+
 - name: Download and unzip the AWS CLI V2
   become: false
   ansible.builtin.unarchive:
-    src: "{{ aws_cli_repo }}"
+    src: "{{ aws_cli_download_url }}"
     dest: "{{ temp_dir }}"
     remote_src: true
   tags: ['download', 'awscli']
@@ -80,12 +85,34 @@
     name: "{{ prereq_pkgs }}"
     state: present
 
-- name: Add kubectl apt key
+- name: Set kubectl repository URL based on architecture
+  ansible.builtin.set_fact:
+    kubectl_repo: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }} signed-by={{ kubectl_keyring }}] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+  tags: ['kubectl']
+
+- name: Create keyring directory for kubectl
   become: yes
-  ansible.builtin.apt_key:
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  tags: ['kubectl']
+
+- name: Download kubectl GPG key
+  become: yes
+  ansible.builtin.get_url:
     url: "{{ kubectl_apt_key }}"
-    state: present
-    keyring: "{{ kubectl_keyring }}"
+    dest: "{{ kubectl_keyring }}"
+    mode: '0644'
+  register: kubectl_key_download
+  tags: ['kubectl', 'apt_key']
+
+- name: Import kubectl GPG key to apt keyring
+  become: yes
+  ansible.builtin.shell: |
+    gpg --dearmor < {{ kubectl_keyring }} > {{ kubectl_keyring }}.gpg
+    mv {{ kubectl_keyring }}.gpg {{ kubectl_keyring }}
+  when: kubectl_key_download is succeeded
   tags: ['kubectl', 'apt_key']
 
 - name: Add kubectl repository
@@ -125,34 +152,42 @@
 # -----------------------------------------------------------------------------#
 # ------------------------HELM-------------------------------------------------#
 
-- name: Add Helm apt key
-  become: yes
-  ansible.builtin.apt_key:
-    url: "{{ helm_apt_key }}"
-    state: present
-  tags: ['helm', 'apt_key']
+- name: Check if Helm is already installed
+  ansible.builtin.command: helm version --client
+  register: helm_check
+  failed_when: false
+  changed_when: false
+  tags: ['helm']
 
-- name: Add Helm repository
+- name: Install Helm via official script
   become: yes
-  ansible.builtin.apt_repository:
-    repo: "{{ helm_repo_url }}"
-    filename: helm
-  tags: ['helm', 'repository']
+  ansible.builtin.shell: |
+    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  when: helm_check.rc != 0
+  register: helm_install_result
+  retries: 3
+  delay: 5
+  tags: ['helm', 'install']
+
+- name: Verify Helm installation and print version
+  become: yes
+  ansible.builtin.command: helm version --client
+  register: helm_version_output
+  changed_when: false
+  when: helm_install_result is succeeded or helm_check.rc == 0
+  tags: ['helm']
+
+- name: Print message after Helm installation
+  ansible.builtin.debug:
+    msg: |
+      "Helm has been successfully installed and version is
+       {{ helm_version_output.stdout_lines[0] }}"
+  when: helm_install_result is succeeded or helm_check.rc == 0
+  tags: ['helm']
 
 - name: Install Helm and enable auto-completion
   become: yes
   block:
-    - name: Install Helm
-      ansible.builtin.apt:
-        name: helm
-        state: present
-        update_cache: true
-        cache_valid_time: 3600
-      register: download_result
-      until: download_result is succeeded
-      retries: 3
-      delay: 10
-      tags: ['helm', 'install']
 
     - name: Check if bash_completion.d directory exists
       ansible.builtin.stat:
@@ -198,16 +233,23 @@
     update_cache: true
     cache_valid_time: 3600
 
+- name: Set Docker repository URL based on architecture
+  ansible.builtin.set_fact:
+    docker_repo: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+  tags: ['docker']
+
 - name: Add Docker GPG Key
   become: yes
   ansible.builtin.apt_key:
     url: "{{ docker_apt_url }}"
     state: present
+  tags: ['docker']
 
 - name: Add Docker Repository
   become: yes
   ansible.builtin.apt_repository:
     repo: "{{ docker_repo }}"
+  tags: ['docker']
 
 - name: Update apt
   become: yes
@@ -246,10 +288,15 @@
 # ---------------------------------------------------------------#
 # ------------------------DOCKER-COMPOSE-------------------------#
 
+- name: Set Docker Compose download URL based on architecture
+  ansible.builtin.set_fact:
+    docker_compose_download_url: "https://github.com/docker/compose/releases/download/v{{ compose_version }}/docker-compose-Linux-{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+  tags: ['docker-compose']
+
 - name: Download and install docker-compose
   become: yes
   ansible.builtin.get_url:
-    url: "{{ docker_compose_url }}"
+    url: "{{ docker_compose_download_url }}"
     dest: /usr/local/bin/docker-compose
     mode: 'u+x,g+x'
     timeout: 30
@@ -296,19 +343,28 @@
     update_cache: true
   register: download_result
 
+- name: Set git config user
+  ansible.builtin.set_fact:
+    git_config_user: "{{ ansible_user_id | default('root') }}"
+    git_config_home: "{{ '/root' if ansible_user_id == 'root' or ansible_user_id is not defined else '/home/' + ansible_user_id }}"
+  tags: ['git']
+
 - name: Create user dir
   become: yes
   ansible.builtin.file:
-    path: /home/{{ ansible_user }}
+    path: "{{ git_config_home }}"
     state: directory
+    mode: '0755'
+  tags: ['git']
 
 - name: Copy git config
   become: yes
   ansible.builtin.template:
     src: gitconfig.j2
-    dest: "/home/{{ ansible_user }}/.gitconfig"
-    owner: "{{ ansible_user }}"
-    mode: 0640
+    dest: "{{ git_config_home }}/.gitconfig"
+    owner: "{{ git_config_user }}"
+    mode: '0640'
+  tags: ['git']
 
 - name: Verify Git installation and print version
   become: yes
@@ -359,11 +415,20 @@
   until: download_result is succeeded
   retries: 3
   delay: 10
+  when: ansible_architecture != 'aarch64'
+  tags: ['lens', 'install']
+
+- name: Skip Lens Desktop on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Lens Desktop is not available for ARM64 architecture. Skipping installation."
+  when: ansible_architecture == 'aarch64'
+  tags: ['lens']
 
 - name: Print message after Lens installation
   ansible.builtin.debug:
     msg: "Lens has been successfully installed."
-  when: download_result is succeeded
+  when: download_result is succeeded and ansible_architecture != 'aarch64'
+  tags: ['lens']
 
 # -------------------------------------------------------#
 # ------------------------TF_SWITCH-------------------------#
@@ -396,4 +461,309 @@
      "tfswitch has been successfully installed and
        {{ tfswitch_version.stdout }}"
   when: tfswitch_version is defined
+
+# -----------------------------------------------------------------------------#
+# ------------------------VISUAL STUDIO CODE-----------------------------------#
+
+- name: Create keyring directory for VS Code
+  become: yes
+  ansible.builtin.file:
+    path: /usr/share/keyrings
+    state: directory
+    mode: '0755'
+  tags: ['vscode']
+
+- name: Download VS Code GPG key
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ vscode_apt_key }}"
+    dest: "{{ vscode_keyring }}"
+    mode: '0644'
+  register: vscode_key_download
+  tags: ['vscode', 'apt_key']
+
+- name: Import VS Code GPG key to apt keyring
+  become: yes
+  ansible.builtin.shell: |
+    gpg --dearmor < {{ vscode_keyring }} > {{ vscode_keyring }}.gpg
+    mv {{ vscode_keyring }}.gpg {{ vscode_keyring }}
+  when: vscode_key_download is succeeded
+  tags: ['vscode', 'apt_key']
+
+- name: Set VS Code repository URL based on architecture
+  ansible.builtin.set_fact:
+    vscode_repo: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }} signed-by={{ vscode_keyring }}] https://packages.microsoft.com/repos/code stable main"
+  tags: ['vscode']
+
+- name: Add VS Code repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: "{{ vscode_repo }}"
+    filename: vscode
+    state: present
+  tags: ['vscode', 'repository']
+
+- name: Install Visual Studio Code
+  become: yes
+  ansible.builtin.apt:
+    name: code
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  register: vscode_install_result
+  retries: 3
+  delay: 5
+  tags: ['vscode', 'install']
+
+- name: Verify VS Code installation
+  become: yes
+  ansible.builtin.command: code --version --no-sandbox --user-data-dir=/tmp/vscode-test 2>&1 || dpkg -l | grep -i code
+  register: vscode_version
+  changed_when: false
+  failed_when: false
+  when: vscode_install_result is succeeded
+  tags: ['vscode']
+
+- name: Print message after VS Code installation
+  ansible.builtin.debug:
+    msg: |
+      "Visual Studio Code has been successfully installed and version is
+       {{ vscode_version.stdout_lines[0] | default('installed') }}"
+  when: vscode_install_result is succeeded
+  tags: ['vscode']
+
+# -----------------------------------------------------------------------------#
+# ------------------------K9S---------------------------------------------------#
+
+- name: Set k9s architecture and download URL
+  ansible.builtin.set_fact:
+    k9s_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+  tags: ['k9s']
+
+- name: Set k9s download URL
+  ansible.builtin.set_fact:
+    k9s_download_url: "{{ k9s_base_url }}/{{ k9s_version }}/k9s_Linux_{{ k9s_arch }}.tar.gz"
+  tags: ['k9s']
+
+- name: Check if k9s is already installed
+  ansible.builtin.command: k9s version
+  register: k9s_check
+  failed_when: false
+  changed_when: false
+  tags: ['k9s']
+
+- name: Download k9s
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ k9s_download_url }}"
+    dest: "{{ temp_dir }}/k9s.tar.gz"
+    mode: '0644'
+  when: k9s_check.rc != 0
+  register: k9s_download_result
+  retries: 3
+  delay: 5
+  tags: ['k9s', 'download']
+
+- name: Create k9s extraction directory
+  become: yes
+  ansible.builtin.file:
+    path: "{{ temp_dir }}/k9s"
+    state: directory
+    mode: '0755'
+  when: k9s_download_result is succeeded
+  tags: ['k9s']
+
+- name: Extract k9s binary
+  become: yes
+  ansible.builtin.unarchive:
+    src: "{{ temp_dir }}/k9s.tar.gz"
+    dest: "{{ temp_dir }}/k9s"
+    remote_src: yes
+  when: k9s_download_result is succeeded
+  tags: ['k9s']
+
+- name: Install k9s binary
+  become: yes
+  ansible.builtin.copy:
+    src: "{{ temp_dir }}/k9s/k9s"
+    dest: "{{ k9s_binary_path }}"
+    mode: '0755'
+    remote_src: yes
+  when: k9s_download_result is succeeded
+  tags: ['k9s', 'install']
+
+- name: Verify k9s installation
+  become: yes
+  ansible.builtin.command: k9s version
+  register: k9s_version_output
+  changed_when: false
+  when: k9s_download_result is succeeded or k9s_check.rc == 0
+  tags: ['k9s']
+
+- name: Print message after k9s installation
+  ansible.builtin.debug:
+    msg: |
+      "k9s has been successfully installed and version is
+       {{ k9s_version_output.stdout_lines[0] | default('installed') }}"
+  when: k9s_download_result is succeeded or k9s_check.rc == 0
+  tags: ['k9s']
+
+# -----------------------------------------------------------------------------#
+# ------------------------AZURE CLI--------------------------------------------#
+
+- name: Download Azure CLI GPG key
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ azure_cli_apt_key }}"
+    dest: "{{ azure_cli_keyring }}"
+    mode: '0644'
+  tags: ['azure', 'apt_key']
+
+- name: Set Azure CLI repository URL based on architecture
+  ansible.builtin.set_fact:
+    azure_cli_repo: "deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }} signed-by={{ azure_cli_keyring }}] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
+  tags: ['azure']
+
+- name: Add Azure CLI repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: "{{ azure_cli_repo }}"
+    filename: azure-cli
+    state: present
+  tags: ['azure', 'repository']
+
+- name: Install Azure CLI
+  become: yes
+  ansible.builtin.apt:
+    name: azure-cli
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  register: azure_install_result
+  retries: 3
+  delay: 5
+  tags: ['azure', 'install']
+
+- name: Verify Azure CLI installation
+  become: yes
+  ansible.builtin.command: az --version
+  register: azure_version
+  changed_when: false
+  when: azure_install_result is succeeded
+  tags: ['azure']
+
+- name: Print message after Azure CLI installation
+  ansible.builtin.debug:
+    msg: |
+      "Azure CLI has been successfully installed and version is
+       {{ azure_version.stdout_lines[0] | default('installed') }}"
+  when: azure_install_result is succeeded
+  tags: ['azure']
+
+# -----------------------------------------------------------------------------#
+# ------------------------GCP CLI (gcloud)--------------------------------------#
+
+- name: Download GCP CLI GPG key
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ gcp_cli_apt_key }}"
+    dest: "{{ gcp_cli_keyring }}"
+    mode: '0644'
+  register: gcp_key_download
+  tags: ['gcp', 'apt_key']
+
+- name: Import GCP CLI GPG key to apt keyring
+  become: yes
+  ansible.builtin.shell: |
+    gpg --dearmor < {{ gcp_cli_keyring }} > {{ gcp_cli_keyring }}.gpg
+    mv {{ gcp_cli_keyring }}.gpg {{ gcp_cli_keyring }}
+  when: gcp_key_download is succeeded
+  tags: ['gcp', 'apt_key']
+
+- name: Add GCP CLI repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: "{{ gcp_cli_repository }}"
+    filename: google-cloud-sdk
+    state: present
+  tags: ['gcp', 'repository']
+
+- name: Install GCP CLI
+  become: yes
+  ansible.builtin.apt:
+    name: google-cloud-cli
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  register: gcp_install_result
+  retries: 3
+  delay: 5
+  tags: ['gcp', 'install']
+
+- name: Verify GCP CLI installation
+  become: yes
+  ansible.builtin.command: gcloud --version
+  register: gcp_version
+  changed_when: false
+  when: gcp_install_result is succeeded
+  tags: ['gcp']
+
+- name: Print message after GCP CLI installation
+  ansible.builtin.debug:
+    msg: |
+      "GCP CLI (gcloud) has been successfully installed and version is
+       {{ gcp_version.stdout_lines[0] | default('installed') }}"
+  when: gcp_install_result is succeeded
+  tags: ['gcp']
+
+# -----------------------------------------------------------------------------#
+# ------------------------ANSIBLE-----------------------------------------------#
+
+- name: Check if Ansible is already installed
+  ansible.builtin.command: ansible --version
+  register: ansible_check
+  failed_when: false
+  changed_when: false
+  tags: ['ansible']
+
+- name: Install Ansible via pip
+  become: yes
+  ansible.builtin.pip:
+    name: ansible
+    state: present
+    executable: pip3
+  when: ansible_check.rc != 0 and ansible_install_method == 'pip'
+  register: ansible_install_result
+  retries: 3
+  delay: 5
+  tags: ['ansible', 'install']
+
+- name: Install Ansible via apt
+  become: yes
+  ansible.builtin.apt:
+    name: ansible
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_check.rc != 0 and ansible_install_method == 'apt'
+  register: ansible_install_result
+  retries: 3
+  delay: 5
+  tags: ['ansible', 'install']
+
+- name: Verify Ansible installation
+  become: yes
+  ansible.builtin.command: ansible --version
+  register: ansible_version
+  changed_when: false
+  when: ansible_install_result is succeeded or ansible_check.rc == 0
+  tags: ['ansible']
+
+- name: Print message after Ansible installation
+  ansible.builtin.debug:
+    msg: |
+      "Ansible has been successfully installed and version is
+       {{ ansible_version.stdout_lines[0] | default('installed') }}"
+  when: ansible_install_result is succeeded or ansible_check.rc == 0
+  tags: ['ansible']
 ...

@@ -1,4 +1,4 @@
-.PHONY: help setup lint install-pre-commit run-pre-commit clean check-ansible check-ubuntu
+.PHONY: help setup lint install-pre-commit run-pre-commit clean check-ansible check-ubuntu test-help test-multipass test-docker test-vagrant clean-multipass clean-docker clean-vagrant
 
 # Default target
 .DEFAULT_GOAL := help
@@ -106,4 +106,81 @@ info: ## Display system and project information
 	@echo "  Playbook: $(PLAYBOOK)"
 	@echo "  Inventory: $(INVENTORY)"
 	@echo "  Roles: $$(ls -d roles/*/ 2>/dev/null | wc -l) roles"
+
+test-help: ## Show testing options (for Mac users)
+	@echo "🍎 Testing on macOS"
+	@echo "=================="
+	@echo ""
+	@echo "This playbook requires Ubuntu Linux."
+	@echo "To test on Mac, see: TESTING_ON_MAC.md"
+	@echo ""
+	@echo "Quick options:"
+	@echo "  make test-multipass  # Using Multipass (easiest)"
+	@echo "  make test-docker     # Using Docker"
+	@echo "  make test-vagrant    # Using Vagrant"
+	@echo ""
+
+##@ Testing on Mac
+
+test-multipass: ## Test using Multipass (recommended for Mac)
+	@echo "🚀 Setting up Multipass VM for testing..."
+	@echo ""
+	@echo "Creating Ubuntu 22.04 VM..."
+	@multipass launch 22.04 --name devops-test --mem 4G --disk 20G --cpus 2 || \
+		(echo "⚠️  VM might already exist. Use: multipass shell devops-test" && exit 0)
+	@echo ""
+	@echo "📁 Mounting current directory to VM..."
+	@multipass mount . devops-test:/workspace || true
+	@echo ""
+	@echo "✅ VM is ready!"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. multipass shell devops-test"
+	@echo "  2. cd /workspace"
+	@echo "  3. make setup"
+	@echo ""
+	@echo "To clean up: make clean-multipass"
+
+test-docker: ## Test using Docker container
+	@echo "🐳 Building Docker test image..."
+	@docker build -f Dockerfile.test -t devops-test:latest .
+	@echo ""
+	@echo "🚀 Starting test container..."
+	@echo "Files are mounted from current directory"
+	@echo ""
+	@docker run -it --rm \
+		-v $(PWD):/workspace \
+		-w /workspace \
+		devops-test:latest \
+		bash -c "echo '✅ Container ready! Run: make setup' && bash"
+
+test-vagrant: ## Test using Vagrant (requires VirtualBox)
+	@echo "📦 Starting Vagrant VM..."
+	@vagrant up
+	@echo ""
+	@echo "✅ VM is ready!"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. vagrant ssh"
+	@echo "  2. cd /vagrant"
+	@echo "  3. make setup"
+	@echo ""
+	@echo "To clean up: vagrant destroy"
+
+clean-multipass: ## Clean up Multipass VM
+	@echo "🧹 Cleaning up Multipass VM..."
+	@multipass stop devops-test 2>/dev/null || true
+	@multipass delete devops-test 2>/dev/null || true
+	@multipass purge 2>/dev/null || true
+	@echo "✅ Cleanup complete"
+
+clean-docker: ## Clean up Docker test image
+	@echo "🧹 Cleaning up Docker test image..."
+	@docker rmi devops-test:latest 2>/dev/null || true
+	@echo "✅ Cleanup complete"
+
+clean-vagrant: ## Clean up Vagrant VM
+	@echo "🧹 Cleaning up Vagrant VM..."
+	@vagrant destroy -f
+	@echo "✅ Cleanup complete"
 

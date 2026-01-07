@@ -9,7 +9,7 @@ An open-source Ansible playbook that automates the installation and configuratio
 
 ## ✨ Features
 
-- 🎯 **One-Command Setup**: Install 15+ DevOps tools with `make setup`
+- 🎯 **One-Command Setup**: Install 20+ DevOps tools with `make setup`
 - 🧩 **Modular Design**: Well-organized Ansible roles for easy customization
 - 🔒 **Secure**: GPG key verification for all packages
 - 📚 **Well Documented**: Comprehensive guides for beginners and experts
@@ -22,9 +22,14 @@ An open-source Ansible playbook that automates the installation and configuratio
 - **Git** - Version control (configured with your details)
 - **Docker & Docker Compose** - Container platform
 - **AWS CLI v2** - Amazon Web Services CLI
+- **Azure CLI** - Microsoft Azure cloud management
+- **GCP CLI (gcloud)** - Google Cloud Platform CLI
 - **Kubectl** - Kubernetes command-line tool
 - **Helm** - Kubernetes package manager
+- **k9s** - Kubernetes terminal UI
 - **Terraform** - Infrastructure as code (via tfswitch)
+- **Ansible** - Automation and configuration management
+- **Visual Studio Code** - Industry-standard code editor
 - **Lens** - Kubernetes IDE
 
 ### Web Browsers
@@ -36,6 +41,8 @@ An open-source Ansible playbook that automates the installation and configuratio
 - **Slack** - Team collaboration
 - **Zoom** - Video conferencing
 - **Telegram** - Messaging app
+- **Discord** - Developer communities
+- **Microsoft Teams** - Enterprise communication
 
 ### System Configuration
 - **SSH Keys** - Secure shell authentication
@@ -47,6 +54,8 @@ An open-source Ansible playbook that automates the installation and configuratio
 - **Permissions**: Sudo/root access
 - **Internet**: Active internet connection
 - **Ansible**: Will be auto-installed if missing (via Makefile)
+
+> **🍎 Using macOS?** This playbook requires Ubuntu Linux. See [TESTING_ON_MAC.md](TESTING_ON_MAC.md) for testing options using VMs or containers.
 
 ## 🚀 Quick Start
 
@@ -100,6 +109,12 @@ make install-pre-commit  # Install pre-commit hooks
 make run-pre-commit   # Run pre-commit on all files
 make clean           # Clean up temporary files
 make info            # Display system information
+
+# Testing on Mac (see TESTING_ON_MAC.md)
+make test-multipass  # Test using Multipass (easiest)
+make test-docker     # Test using Docker
+make test-vagrant    # Test using Vagrant
+make test-help       # Show testing options
 ```
 
 ## ⚙️ Customization

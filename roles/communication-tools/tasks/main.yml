@@ -4,7 +4,7 @@
 - name: apt-get update
   become: yes
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
   tags: ['slack', 'communication-tools', 'update']
 
@@ -37,26 +37,49 @@
   ansible.builtin.apt:
     deb: "{{ temp_dir }}/slack-desktop-{{ slack_version }}-amd64.deb"
     state: present
-  when: check_slack.rc == 1
+  when: check_slack.rc == 1 and ansible_architecture != 'aarch64'
   tags: ['slack', 'communication-tools', 'install']
+
+- name: Skip Slack on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Slack is not available for ARM64 architecture. Skipping installation."
+  when: ansible_architecture == 'aarch64'
+  tags: ['slack', 'communication-tools']
 
 # -------------------------------------------------------------------------#
 # ------------------------Zoom---------------------------------------------#
 
+- name: Set Zoom package architecture
+  ansible.builtin.set_fact:
+    zoom_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+  tags: ['zoom']
+
+- name: Set Zoom package name
+  ansible.builtin.set_fact:
+    zoom_package: "zoom_{{ zoom_arch }}.deb"
+  tags: ['zoom']
+
 - name: Download Zoom package
   become: yes
   ansible.builtin.get_url:
-    url: "https://zoom.us/client/latest/zoom_amd64.deb"
-    dest: "{{ temp_dir }}/zoom_amd64.deb"
+    url: "https://zoom.us/client/latest/{{ zoom_package }}"
+    dest: "{{ temp_dir }}/{{ zoom_package }}"
     timeout: 30
   retries: 3
   delay: 5
+  when: ansible_architecture != 'aarch64'
   tags: ['zoom', 'communication-tools', 'download']
+
+- name: Skip Zoom on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Zoom is not available for ARM64 architecture. Skipping installation."
+  when: ansible_architecture == 'aarch64'
+  tags: ['zoom', 'communication-tools']
 
 - name: Install zoom
   become: yes
   ansible.builtin.apt:
-    deb: "{{ temp_dir }}/zoom_amd64.deb"
+    deb: "{{ temp_dir }}/{{ zoom_package }}"
     state: present
   tags: ['zoom', 'communication-tools', 'install']
 
@@ -75,4 +98,98 @@
     name: telegram
     state: present
   tags: ['telegram', 'communication-tools', 'install']
+
+# --------------------------------------------------------------------------#
+# ------------------------Discord------------------------------------------#
+
+- name: Check if Discord is already installed
+  ansible.builtin.command: discord --version
+  register: discord_check
+  failed_when: false
+  changed_when: false
+  tags: ['discord', 'communication-tools']
+
+- name: Install Discord via snap
+  become: yes
+  ansible.builtin.snap:
+    name: discord
+    state: present
+    channel: "{{ discord_snap_channel }}"
+  when: discord_check.rc != 0
+  register: discord_install_result
+  tags: ['discord', 'communication-tools', 'install']
+
+- name: Verify Discord installation
+  become: yes
+  ansible.builtin.command: discord --version
+  register: discord_version
+  failed_when: false
+  changed_when: false
+  when: discord_install_result is succeeded or discord_check.rc == 0
+  tags: ['discord', 'communication-tools']
+
+- name: Print message after Discord installation
+  ansible.builtin.debug:
+    msg: "Discord has been successfully installed"
+  when: discord_install_result is succeeded or discord_check.rc == 0
+  tags: ['discord', 'communication-tools']
+
+# --------------------------------------------------------------------------#
+# ------------------------Microsoft Teams-----------------------------------#
+
+- name: Check if Teams is already installed
+  ansible.builtin.command: teams --version
+  register: teams_check
+  failed_when: false
+  changed_when: false
+  tags: ['teams', 'communication-tools']
+
+- name: Set Teams download URL based on architecture
+  ansible.builtin.set_fact:
+    teams_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+    teams_download_url: "https://teams.microsoft.com/downloads/desktopurl?env=production&plat=linux&arch={{ teams_arch }}&download=true&linuxArchiveType=deb"
+  tags: ['teams']
+
+- name: Download Microsoft Teams package
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ teams_download_url }}"
+    dest: "{{ temp_dir }}/teams-{{ teams_arch }}.deb"
+    timeout: 60
+    follow_redirects: all
+  when: teams_check.rc != 0
+  register: teams_download_result
+  retries: 3
+  delay: 5
+  tags: ['teams', 'communication-tools', 'download']
+
+- name: Install Microsoft Teams
+  become: yes
+  ansible.builtin.apt:
+    deb: "{{ temp_dir }}/teams-{{ teams_arch }}.deb"
+    state: present
+  when: teams_download_result is succeeded and ansible_architecture != 'aarch64'
+  register: teams_install_result
+  tags: ['teams', 'communication-tools', 'install']
+
+- name: Skip Teams on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Microsoft Teams has limited ARM64 support. Skipping installation."
+  when: ansible_architecture == 'aarch64'
+  tags: ['teams', 'communication-tools']
+
+- name: Verify Teams installation
+  become: yes
+  ansible.builtin.command: teams --version
+  register: teams_version
+  failed_when: false
+  changed_when: false
+  when: teams_install_result is succeeded and ansible_architecture != 'aarch64'
+  tags: ['teams', 'communication-tools']
+
+- name: Print message after Teams installation
+  ansible.builtin.debug:
+    msg: "Microsoft Teams has been successfully installed"
+  when: teams_install_result is succeeded and ansible_architecture != 'aarch64'
+  tags: ['teams', 'communication-tools']
 ...

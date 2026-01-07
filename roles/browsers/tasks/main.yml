@@ -25,8 +25,14 @@
     name: brave-browser
     state: present
     update_cache: true
-  when: "'brave' in browsers"
+  when: "'brave' in browsers and ansible_architecture != 'aarch64'"
   tags: ['brave', 'browsers', 'install']
+
+- name: Skip Brave on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Brave Browser is not available for ARM64 architecture. Skipping installation."
+  when: "'brave' in browsers and ansible_architecture == 'aarch64'"
+  tags: ['brave', 'browsers']
 
 # -----------------------------------------------------------------------#
 # ------------------------Chrome-Browser---------------------------------#
@@ -36,8 +42,14 @@
   ansible.builtin.apt:
     deb: "{{ chrome_url }}"
     state: present
-  when: "'chrome' in browsers"
+  when: "'chrome' in browsers and ansible_architecture != 'aarch64'"
   tags: ['chrome', 'browsers', 'install']
+
+- name: Skip Chrome on ARM64
+  ansible.builtin.debug:
+    msg: "⚠️  Chrome Browser is not available for ARM64 architecture. Skipping installation."
+  when: "'chrome' in browsers and ansible_architecture == 'aarch64'"
+  tags: ['chrome', 'browsers']
 
 # -----------------------------------------------------------------------#
 # ------------------------Tor-Browser---------------------------------#
