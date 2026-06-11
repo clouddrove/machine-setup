@@ -570,7 +570,7 @@
     path: "{{ temp_dir }}/k9s"
     state: directory
     mode: '0755'
-  when: k9s_download_result is succeeded
+  when: k9s_check.rc != 0
   tags: ['k9s']
 
 - name: Extract k9s binary
@@ -579,7 +579,7 @@
     src: "{{ temp_dir }}/k9s.tar.gz"
     dest: "{{ temp_dir }}/k9s"
     remote_src: yes
-  when: k9s_download_result is succeeded
+  when: k9s_check.rc != 0
   tags: ['k9s']
 
 - name: Install k9s binary
@@ -589,7 +589,7 @@
     dest: "{{ k9s_binary_path }}"
     mode: '0755'
     remote_src: yes
-  when: k9s_download_result is succeeded
+  when: k9s_check.rc != 0
   tags: ['k9s', 'install']
 
 - name: Verify k9s installation

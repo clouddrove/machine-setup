@@ -1,4 +1,7 @@
 ---
+# Ubuntu 24.04 uses t64 packages
+libasound_package: "{{ 'libasound2t64' if ansible_distribution_version is version('24.04', '>=') else 'libasound2' }}"
+
 # Pre-requisite packages
 prereq_pkgs:
   - ca-certificates
@@ -15,7 +18,7 @@ prereq_pkgs:
   - libxtst6
   - libx11-xcb1
   - libxcb-dri3-0
-  - libasound2
+  - "{{ libasound_package }}"
   - libssl-dev
   - htop
   - openssh-server
