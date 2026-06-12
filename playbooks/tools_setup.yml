@@ -24,7 +24,7 @@
   vars:
     # Hostname prefix (customize this for your organization)
     # Default: DEV, can be overridden by setting hostname_prefix in inventory or command line
-    hostname_prefix: "{{ hostname_prefix | default('DEV') }}"
+    # hostname_prefix: "{{ hostname_prefix | default('DEV') }}"
 
     # Generate a random 5-digit number for hostname (10000-99999)
     hostname_base: "{{ range(10000, 100000) | random }}"
@@ -32,7 +32,7 @@
     # Hostname will be set as: {prefix}-{random_number}
     # Default: DEV-{random_number}
     # To customize: ansible-playbook ... -e hostname_prefix=MYORG
-    hostname: "{{ hostname_prefix }}-{{ hostname_base }}"
+    hostname: "{{ hostname_prefix | default('DEV') }}-{{ hostname_base }}"
 
     # Temporary directory for downloads
     temp_dir: /tmp

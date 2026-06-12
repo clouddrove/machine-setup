@@ -22,7 +22,7 @@ help: ## Display this help message
 setup: check-ansible check-ubuntu ## Run the Ansible playbook to set up the machine
 	@echo "🚀 Starting DevOps Machine Setup..."
 	@echo ""
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOK)
+	ansible-playbook -K -i ./inventories/hosts.ini ./playbooks/tools_setup.yml
 
 check-ansible: ## Check if Ansible is installed
 	@which ansible > /dev/null || (echo "❌ Ansible not found. Installing..." && sudo apt update && sudo apt install -y ansible)
